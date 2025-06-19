@@ -93,8 +93,7 @@
     <div class="stepper-step" data-step="4"><span class="step-num">5</span>生成</div>
   </div>
   <form id="promptForm">
-
-      
+    <input type="hidden" id="promptId" name="id">
     <div id="stepContents" class="mb-4">
       <div class="step-content active" data-step="0">
         <div class="row g-3">
@@ -295,6 +294,8 @@ saveBtn.onclick = async function() {
     data.example = document.getElementById('example').value;
     data.content = document.getElementById('content').value;
     data.title = document.getElementById('title').value;
+    // 自动带上id（如果有）
+    data.id = document.getElementById('promptId').value || undefined;
     const res = await fetch('/save', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
@@ -302,6 +303,7 @@ saveBtn.onclick = async function() {
     });
     const result = await res.json();
     if (result.success) {
+        if (result.id) document.getElementById('promptId').value = result.id;
         alert('保存成功！');
     } else {
         alert('保存失败：' + (result.error || '未知错误'));
@@ -309,12 +311,13 @@ saveBtn.onclick = async function() {
 };
 // 测试弹窗
 const testBtn = document.getElementById('testBtn');
-// const testModal = new bootstrap.Modal(document.getElementById('testModal'));
 testBtn.onclick = function() {
-    document.getElementById('testTask').value = '';
-    document.getElementById('testModel').value = '';
-    document.getElementById('testResult').value = '';
-    testModal.show();
+    const promptId = document.getElementById('promptId').value;
+    if (!promptId) {
+        alert('请先保存，生成ID后才能测试！');
+        return;
+    }
+    window.location.href = `/prompts/${promptId}/`;
 };
 // 执行测试
 const executeBtn = document.getElementById('executeBtn');
@@ -330,5 +333,51 @@ executeBtn.onclick = async function() {
     const result = await res.json();
     document.getElementById('testResult').value = result.result || '';
 };
+// 分类下拉框动态加载
+window.addEventListener('DOMContentLoaded', async function() {
+    const menuSelect = document.getElementById('menu');
+    try {
+        const res = await fetch('/api/menus/');
+        const result = await res.json();
+        if (result.success && Array.isArray(result.menus)) {
+            // 递归渲染菜单树
+            function renderMenuOptions(menus, prefix = '') {
+                let options = '';
+                for (const menu of menus) {
+                    options += `<option value="${menu.id}">${prefix}${menu.name}</option>`;
+                    if (menu.children && menu.children.length > 0) {
+                        options += renderMenuOptions(menu.children, prefix + '—');
+                    }
+                }
+                return options;
+            }
+            menuSelect.innerHTML = '<option value="">请选择分类</option>' + renderMenuOptions(result.menus);
+        }
+    } catch (e) {
+        menuSelect.innerHTML = '<option value="">加载失败</option>';
+    }
+    // 标签
+    try {
+        const tagsSelect = document.getElementById('tags');
+        const res = await fetch('/api/tags/');
+        const result = await res.json();
+        if (result.success && Array.isArray(result.tags)) {
+            // 递归渲染菜单树
+            function renderTagOptions(tags) {
+                console.log(tags)
+                let options = '';
+                for (const tag of tags) {
+                    
+                    options += `<option value="${tag}">${tag}</option>`;
+                }
+                return options;
+            }
+            tagsSelect.innerHTML = renderTagOptions(result.tags);
+        }
+
+    } catch (e) {
+        tagsSelect.innerHTML = '';
+    }
+});
 </script>
 {% endblock %} 

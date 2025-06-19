@@ -226,6 +226,8 @@
             min-height: 0; /* 允许 flex item 缩小 */
             height: auto; /* 自动高度 */
             box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.05); /* 轻微内阴影 */
+            max-height: 600px;
+            overflow-y: auto;
         }
 
         /* 初始提示消息样式 */
@@ -422,6 +424,11 @@
                 margin-right: 0;
                 margin-bottom: 1.2rem;
             }
+        }
+
+        #promptContentDisplay {
+            max-height: 600px;
+            overflow-y: auto;
         }
     </style>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -1111,31 +1118,36 @@
             // 动态加载 Ollama 模型列表
             var chatModelSelect = document.getElementById('chatModel');
             if (chatModelSelect) {
-                fetch('/api/ollama_models/')
-                    .then(function (response) {
-                        return response.json();
-                    })
-                    .then(function (data) {
-                        chatModelSelect.innerHTML = '';
-                        if (data.success && Array.isArray(data.models)) {
-                            data.models.forEach(function (model) {
-                                var opt = document.createElement('option');
-                                opt.value = model;
-                                opt.textContent = model;
-                                chatModelSelect.appendChild(opt);
-                            });
-                            // 添加自定义选项
-                            var customOpt = document.createElement('option');
-                            customOpt.value = '';
-                            customOpt.textContent = '自定义...';
-                            chatModelSelect.appendChild(customOpt);
-                        } else {
-                            chatModelSelect.innerHTML = '<option>llama2</option><option>qwen3:8b</option><option>glm-4</option><option>phi3</option><option>自定义...</option>';
-                        }
-                    })
-                    .catch(function () {
-                        chatModelSelect.innerHTML = '<option>llama2</option><option>qwen3:8b</option><option>glm-4</option><option>phi3</option><option>自定义...</option>';
-                    });
+                chatModelSelect.innerHTML = '<option>gemini2.5</option><option>qwen3:8b</option><option>glm-4</option><option>phi3</option><option>自定义...</option>';
+
+                // fetch('/api/ollama_models/')
+                //     .then(function (response) {
+                //         chatModelSelect.innerHTML = '';
+                //         const result = response.json();
+                //         if (result.success) {
+                //             console.log(result.template || '');
+                //         } else {
+                //             alert('优化失败：' + (result.error || '未知错误'));
+                //         }
+                        // if (data.success && Array.isArray(data.models)) {
+                        //     data.models.forEach(function (model) {
+                        //         var opt = document.createElement('option');
+                        //         opt.value = model;
+                        //         opt.textContent = model;
+                        //         chatModelSelect.appendChild(opt);
+                        //     });
+                        //     // 添加自定义选项
+                        //     var customOpt = document.createElement('option');
+                        //     customOpt.value = '';
+                        //     customOpt.textContent = '自定义...';
+                        //     chatModelSelect.appendChild(customOpt);
+                        // } else {
+                        //     chatModelSelect.innerHTML = '<option>llama2</option><option>qwen3:8b</option><option>glm-4</option><option>phi3</option><option>自定义...</option>';
+                        // }
+                    // })
+                    // .catch(function () {
+                    //     chatModelSelect.innerHTML = '<option>gemini</option><option>qwen3:8b</option><option>glm-4</option><option>phi3</option><option>自定义...</option>';
+                    // });
             }
 
             var chatInputForm = document.getElementById('chatInputForm');
@@ -1214,7 +1226,12 @@
                         var aiMessageDiv = document.createElement('div');
                         aiMessageDiv.className = 'message ai-message';
                         if (data.success) {
-                            aiMessageDiv.innerHTML = `<div class="message-content">${data.response}</div>`;
+                            var response_value = data.response;
+                            if (data.response.includes('```')) {
+                              response_value = response_value.replace(/```/g, '');
+                            }
+                            aiMessageDiv.innerHTML = `<div class="message-content">${response_value}</div>`;
+                            
                         } else {
                             aiMessageDiv.innerHTML = `<div class="message-content"><div class="message-text text-danger">Error: ${data.error}</div></div>`;
                         }

@@ -1,7 +1,7 @@
 from django.urls import path
 from . import views
 from django.contrib.auth import views as auth_views
-from .views import menu_api
+from .views import menu_api, get_tags
 
 urlpatterns = [
     path('', views.home, name='home'),
@@ -19,6 +19,7 @@ urlpatterns = [
     path('api/ollama_models/', views.ollama_models, name='ollama_models'),
     path('tags/', views.tag_manage, name='tag_manage'),
     path('prompt_manage/', views.prompt_manage, name='prompt_manage'),
+    path('api/tags/', get_tags, name='get_tags'),
     path('api/menus/', menu_api, name='menu_api'),
     path('api/menus/<int:menu_id>/', menu_api, name='menu_api_detail'),
     path('save', views.save_prompt, name='save_prompt'),

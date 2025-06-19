@@ -219,23 +219,26 @@ def ollama_chat(request):
             temperature = float(data.get('temperature', 0.7))
             max_tokens = int(data.get('max_tokens', 2000))
 
+            result =call_llm(prompt_content, user_input)
+
+
             # 使用 LangChain 调用 Ollama
-            callback_manager = CallbackManager([StreamingStdOutCallbackHandler()])
-            llm = Ollama(
-                model=model,
-                callback_manager=callback_manager,
-                base_url="http://localhost:11434",
-                temperature=temperature,
-                num_predict=max_tokens
-            )
+            # callback_manager = CallbackManager([StreamingStdOutCallbackHandler()])
+            # llm = Ollama(
+            #     model=model,
+            #     callback_manager=callback_manager,
+            #     base_url="http://localhost:11434",
+            #     temperature=temperature,
+            #     num_predict=max_tokens
+            # )
             
-            # 构建完整的提示词
-            full_prompt = f"{prompt_content}\n\nUser: {user_input}\nAssistant:"
+            # # 构建完整的提示词
+            # full_prompt = f"{prompt_content}\n\nUser: {user_input}\nAssistant:"
             
-            # 获取模型响应
-            response = llm.invoke(full_prompt)
+            # # 获取模型响应
+            # response = llm.invoke(full_prompt)
             
-            return JsonResponse({'success': True, 'response': response})
+            return JsonResponse({'success': True, 'response': result})
 
         except Exception as e:
             print(f"Unexpected error in ollama_chat: {e}")
@@ -304,14 +307,17 @@ def menu_api(request, menu_id=None):
 @require_GET
 def ollama_models(request):
     try:
+        system_prompt = request.data.prompt_content
+        user_input = request.data.user_input
+        result =call_llm(system_prompt, user_input)
         # Query local Ollama service for models
-        response = requests.get("http://localhost:11434/api/tags", timeout=5)
-        response.raise_for_status()
-        data = response.json()
-        # The models are in data['models'] or data['models'][i]['name'] depending on Ollama's API
-        # For Ollama v0.1.34+, the endpoint returns {"models": [{"name": "llama2"}, ...]}
-        models = [m['name'] for m in data.get('models', []) if 'embed' not in m['name']]
-        return JsonResponse({'success': True, 'models': models})
+        # response = requests.get("http://localhost:11434/api/tags", timeout=5)
+        # response.raise_for_status()
+        # data = response.json()
+        # # The models are in data['models'] or data['models'][i]['name'] depending on Ollama's API
+        # # For Ollama v0.1.34+, the endpoint returns {"models": [{"name": "llama2"}, ...]}
+        # models = [m['name'] for m in data.get('models', []) if 'embed' not in m['name']]
+        return JsonResponse({'success': True, 'result': result})
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
@@ -382,11 +388,18 @@ def import_prompts_excel(request):
         os.remove(tmp_path)
 
 @csrf_exempt
+def get_tags(request):
+    tags = Tag.objects.order_by('id')
+    data = [tag.name for tag in tags]
+    return JsonResponse({'success': True, 'tags': data})
+    
+@csrf_exempt
 @login_required
 @require_POST
 def save_prompt(request):
     try:
         data = json.loads(request.body)
+        prompt_id = data.get('id')
         title = data.get('title', '').strip()
         content = data.get('content', '').strip()
         role = data.get('role', '').strip()
@@ -399,23 +412,41 @@ def save_prompt(request):
         # 校验必填
         if not title or not content or not role or not goal:
             return JsonResponse({'success': False, 'error': '标题、内容、角色、目标为必填项'}, status=400)
-        prompt = Prompt.objects.create(
-            title=title,
-            content=content,
-            role=role,
-            goal=goal,
-            context=context,
-            output_format=output_format,
-            example=example,
-            owner=request.user,
-            menu_id=menu_id
-        )
-        if tags:
-            prompt.tags.set(tags)
-        prompt.save()
-        return JsonResponse({'success': True, 'id': prompt.id})
+        if prompt_id:
+            # 修改
+            prompt = Prompt.objects.get(id=prompt_id, owner=request.user)
+            prompt.title = title
+            prompt.content = content
+            prompt.role = role
+            prompt.goal = goal
+            prompt.context = context
+            prompt.output_format = output_format
+            prompt.example = example
+            prompt.menu_id = menu_id
+            # if tags:
+            #     prompt.tags.set(tags)
+            prompt.save()
+            return JsonResponse({'success': True, 'id': prompt.id, 'updated': True})
+        else:
+            # 新建
+            prompt = Prompt.objects.create(
+                title=title,
+                content=content,
+                role=role,
+                goal=goal,
+                context=context,
+                output_format=output_format,
+                example=example,
+                owner=request.user,
+                menu_id=menu_id
+            )
+            # if tags:
+            #     prompt.tags.set(tags)
+            prompt.save()
+            return JsonResponse({'success': True, 'id': prompt.id, 'created': True})
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
 
 @csrf_exempt
 @login_required
