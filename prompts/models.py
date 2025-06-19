@@ -26,7 +26,8 @@ class Menu(models.Model):
 
 class Prompt(models.Model):
     title = models.CharField(max_length=200, unique=True)
-    content = models.TextField(blank=True)
+    content = models.TextField()
+    context = models.TextField(blank=True)
     role = models.TextField(blank=True,)
     goal = models.TextField(blank=True,)
     output_format = models.TextField(blank=True,)

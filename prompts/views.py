@@ -318,6 +318,7 @@ def save_prompt(request):
         output_format = data.get('output_format', '').strip()
         example = data.get('example', '').strip()
         tags = data.get('tags', [])
+        menu_id = data.get('menu_id', 1)
         # 校验必填
         if not title or not content or not role or not goal:
             return JsonResponse({'success': False, 'error': '标题、内容、角色、目标为必填项'}, status=400)
@@ -329,7 +330,8 @@ def save_prompt(request):
             context=context,
             output_format=output_format,
             example=example,
-            owner=request.user
+            owner=request.user,
+            menu_id=menu_id
         )
         if tags:
             prompt.tags.set(tags)
