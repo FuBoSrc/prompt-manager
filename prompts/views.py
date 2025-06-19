@@ -231,3 +231,7 @@ def ollama_chat(request):
             return JsonResponse({'success': False, 'error': f'对话请求失败：{str(e)}'}, status=500)
 
     return JsonResponse({'success': False, 'error': 'Invalid request method.'}, status=405)
+
+@login_required
+def prompt_manage(request):
+    return render(request, 'prompts/prompt_manage.html')

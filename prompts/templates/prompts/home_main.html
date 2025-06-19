@@ -76,7 +76,7 @@
         </a>
       </div>
       <div class="col-12 col-md-4 col-lg-2">
-        <div class="feature-card h-100">
+        <div class="feature-card h-100" id="featureOptimizeCard" style="cursor:pointer;">
           <div class="feature-icon"><i class="bi bi-lightbulb"></i></div>
           <div class="feature-card-title">提示词优化</div>
           <div class="feature-card-desc">AI优化服务，一键生成高质量提示词</div>
@@ -116,6 +116,10 @@
         userDropdown.classList.remove('show');
       }
     });
+    // 跳转到prompt_manage.html
+    document.getElementById('featureOptimizeCard').onclick = function() {
+      window.location.href = '/prompt_manage/';
+    };
   </script>
 </body>
 </html> 

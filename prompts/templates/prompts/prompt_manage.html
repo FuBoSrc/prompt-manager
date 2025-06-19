@@ -1,0 +1,229 @@
+{% extends 'prompts/base.html' %}
+{% block content %}
+<style>
+  body {
+    background: linear-gradient(135deg, #fff 0%, #fff7e6 100%) !important;
+  }
+</style>
+<div class="container py-5">
+  <h2 class="fw-bold mb-4 text-center" style="color:#ff9800;font-size:2rem;letter-spacing:1px;">添加与优化提示词</h2>
+  <form id="promptForm">
+    <div class="row g-4 mb-3">
+      <div class="col-md-6">
+        <label for="promptName" class="form-label fw-bold">名称</label>
+        <input type="text" class="form-control rounded-3" id="promptName" name="name" required>
+      </div>
+      <div class="col-md-3">
+        <label for="promptCategory" class="form-label fw-bold">选择分类</label>
+        <select class="form-select rounded-3" id="promptCategory" name="category">
+          <option value="">请选择分类</option>
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label for="promptTags" class="form-label fw-bold">选择标签</label>
+        <select class="form-select rounded-3" id="promptTags" name="tags" multiple>
+        </select>
+      </div>
+    </div>
+    <div class="mb-4">
+      <ul class="nav nav-pills justify-content-center" id="stepNav">
+        <li class="nav-item"><a class="nav-link active" data-step="0" href="#">角色与目标</a></li>
+        <li class="nav-item"><a class="nav-link" data-step="1" href="#">背景信息</a></li>
+        <li class="nav-item"><a class="nav-link" data-step="2" href="#">输出格式</a></li>
+        <li class="nav-item"><a class="nav-link" data-step="3" href="#">示例</a></li>
+      </ul>
+    </div>
+    <div id="stepContents" class="mb-4">
+      <div class="step-content active" data-step="0">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label for="role" class="form-label fw-bold">选择角色</label>
+            <select class="form-select rounded-3" id="role" name="role">
+              <option value="">请选择角色</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label for="goal" class="form-label fw-bold">目标</label>
+            <textarea class="form-control rounded-3" id="goal" name="goal" rows="3"></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="step-content" data-step="1">
+        <label for="background" class="form-label fw-bold">背景信息</label>
+        <textarea class="form-control rounded-3" id="background" name="background" rows="3"></textarea>
+      </div>
+      <div class="step-content" data-step="2">
+        <label for="outputFormat" class="form-label fw-bold">输出格式</label>
+        <textarea class="form-control rounded-3" id="outputFormat" name="output_format" rows="3"></textarea>
+      </div>
+      <div class="step-content" data-step="3">
+        <label for="example" class="form-label fw-bold">示例</label>
+        <textarea class="form-control rounded-3" id="example" name="example" rows="3"></textarea>
+      </div>
+    </div>
+    <div class="mb-4">
+      <label for="template" class="form-label fw-bold">提示词模版</label>
+      <textarea class="form-control rounded-3" id="template" name="template" rows="4"></textarea>
+    </div>
+    <div class="d-flex flex-wrap gap-3 justify-content-center mb-2">
+      <button type="button" class="btn btn-warning px-4" id="generateBtn" style="color:#fff;font-weight:600;">生成提示词模版</button>
+      <button type="button" class="btn btn-outline-warning px-4" id="optimizeBtn" style="font-weight:600;">优化提示词模版</button>
+      <button type="button" class="btn btn-success px-4" id="saveBtn" style="font-weight:600;">保存</button>
+      <button type="button" class="btn btn-info px-4" id="testBtn" style="font-weight:600;">测试</button>
+    </div>
+  </form>
+</div>
+<!-- 测试弹窗 -->
+<div class="modal fade" id="testModal" tabindex="-1" aria-labelledby="testModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title fw-bold" id="testModalLabel">测试提示词</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label for="testTask" class="form-label fw-bold">任务/问题</label>
+          <input type="text" class="form-control rounded-3" id="testTask">
+        </div>
+        <div class="mb-3">
+          <label for="testModel" class="form-label fw-bold">选择模型</label>
+          <select class="form-select rounded-3" id="testModel">
+            <option value="">请选择模型</option>
+          </select>
+        </div>
+        <div class="mb-3">
+          <label for="testResult" class="form-label fw-bold">结果</label>
+          <textarea class="form-control rounded-3" id="testResult" rows="4" readonly></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary px-4" id="executeBtn">执行</button>
+        <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">关闭</button>
+      </div>
+    </div>
+  </div>
+</div>
+<style>
+  .step-content { display: none; }
+  .step-content.active { display: block; }
+  .nav-pills .nav-link.active {
+    background: linear-gradient(90deg, #ff9800 0%, #ffb74d 100%);
+    color: #fff !important;
+    font-weight: 600;
+    border-radius: 12px;
+  }
+  .nav-pills .nav-link {
+    color: #ff9800;
+    font-weight: 500;
+    border-radius: 12px;
+    margin: 0 0.3rem;
+    transition: background 0.2s, color 0.2s;
+  }
+  .form-label {
+    color: #ff9800;
+    font-weight: 600;
+  }
+  .btn-warning {
+    background: linear-gradient(90deg, #ff9800 0%, #ffb74d 100%);
+    border: none;
+  }
+  .btn-warning:hover, .btn-outline-warning:hover {
+    background: linear-gradient(90deg, #ffb74d 0%, #ff9800 100%);
+    color: #fff;
+  }
+  .btn-outline-warning {
+    border: 2px solid #ff9800;
+    color: #ff9800;
+    background: #fff;
+  }
+  .btn-success, .btn-info, .btn-primary, .btn-secondary {
+    border-radius: 8px;
+  }
+  .form-control, .form-select {
+    border-radius: 10px;
+    border: 1.5px solid #eee;
+    background: #fff;
+    color: #222;
+    font-size: 1rem;
+  }
+</style>
+<script>
+// 步骤导航切换
+const navLinks = document.querySelectorAll('#stepNav .nav-link');
+const stepContents = document.querySelectorAll('.step-content');
+navLinks.forEach(link => {
+    link.addEventListener('click', function(e) {
+        e.preventDefault();
+        navLinks.forEach(l => l.classList.remove('active'));
+        this.classList.add('active');
+        const step = this.getAttribute('data-step');
+        stepContents.forEach(content => {
+            content.classList.toggle('active', content.getAttribute('data-step') === step);
+        });
+    });
+});
+// 生成提示词模版
+const generateBtn = document.getElementById('generateBtn');
+generateBtn.onclick = async function() {
+    const data = Object.fromEntries(new FormData(document.getElementById('promptForm')));
+    const res = await fetch('/generate', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(data)
+    });
+    const result = await res.json();
+    document.getElementById('template').value = result.template || '';
+};
+// 优化提示词模版
+const optimizeBtn = document.getElementById('optimizeBtn');
+optimizeBtn.onclick = async function() {
+    const data = Object.fromEntries(new FormData(document.getElementById('promptForm')));
+    const res = await fetch('/optimize', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(data)
+    });
+    const result = await res.json();
+    document.getElementById('template').value = result.template || '';
+};
+// 保存
+const saveBtn = document.getElementById('saveBtn');
+saveBtn.onclick = async function() {
+    const data = Object.fromEntries(new FormData(document.getElementById('promptForm')));
+    const res = await fetch('/save', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(data)
+    });
+    if (res.ok) {
+        alert('保存成功！');
+    } else {
+        alert('保存失败！');
+    }
+};
+// 测试弹窗
+const testBtn = document.getElementById('testBtn');
+const testModal = new bootstrap.Modal(document.getElementById('testModal'));
+testBtn.onclick = function() {
+    document.getElementById('testTask').value = '';
+    document.getElementById('testModel').value = '';
+    document.getElementById('testResult').value = '';
+    testModal.show();
+};
+// 执行测试
+const executeBtn = document.getElementById('executeBtn');
+executeBtn.onclick = async function() {
+    const task = document.getElementById('testTask').value;
+    const model = document.getElementById('testModel').value;
+    const template = document.getElementById('template').value;
+    const res = await fetch('/execute', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({task, model, template})
+    });
+    const result = await res.json();
+    document.getElementById('testResult').value = result.result || '';
+};
+</script>
+{% endblock %} 
