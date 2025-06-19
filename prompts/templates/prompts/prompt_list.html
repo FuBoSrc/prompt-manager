@@ -1,696 +1,1256 @@
 {% extends 'prompts/base.html' %}
 {% block content %}
-<style>
-  body {
-    background-color: #f8f8f8;
-  }
-  .navbar-brand {
-    font-size: 1.8rem;
-    font-weight: bold;
-    color: #ff9800 !important;
-    display: flex;
-    align-items: center;
-  }
-  .navbar-brand img {
-    height: 35px;
-    margin-right: 10px;
-  }
-  .nav-link {
-    color: #222 !important;
-    font-weight: 500;
-  }
-  .btn-primary {
-    background-color: #ff9800;
-    border-color: #ff9800;
-  }
-  .btn-primary:hover {
-    background-color: #e68900;
-    border-color: #e68900;
-  }
-  .fw-bold, h3, h5, .modal-title {
-    color: #ff9800 !important;
-  }
-  .text-muted {
-    color: #888 !important;
-  }
-  .required-star {
-    color: #222; /* Changed to dark grey/black as per image */
-    margin-left: 0.2em;
-    font-size: 1em;
-    font-weight: bold;
-  }
-  .select-multi {
-    /* This class is used for the select2 wrapper, ensuring consistent styling */
-    background: #f8f8f8;
-    color: #222;
-    border: 1px solid #eee;
-    border-radius: 8px;
-    min-height: 44px;
-    padding: 0.5em 0.75em;
-    font-size: 1.1em;
-  }
-  .select-multi option {
-    background: #fff;
-    color: #222;
-    font-size: 1em;
-  }
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  .animated-card {
-    animation: fadeIn 0.5s ease-out;
-  }
-  /* Styling for form inputs to match the image */
-  .form-control,
-  .select2-container--default .select2-selection--single,
-  .select2-container--default .select2-selection--multiple {
-    background-color: #f8f8f8; /* Match image */
-    border-radius: 8px; /* Match image */
-    border: 1px solid #eee; /* Subtle border */
-  }
-  .form-control:hover,
-  .form-select:hover,
-  .select2-container--default .select2-selection--single:hover,
-  .select2-container--default .select2-selection--multiple:hover {
-    box-shadow: 0 0 0 2px #ff980033;
-  }
-  /* Styling for the light cancel button */
-  .btn-light {
-    background-color: #f8f8f8 !important; /* Make sure it's light */
-    border-color: #f8f8f8 !important; /* Remove border */
-  }
-  .btn-light:hover {
-    background-color: #e0e0e0 !important; /* Slightly darker on hover */
-    border-color: #e0e0e0 !important;
-  }
-  .form-control::placeholder {
-    color: #aaa !important;
-  }
-  @keyframes breathe {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.02); }
-    100% { transform: scale(1); }
-  }
-  .prompt-card {
-    transition: all 0.3s ease;
-    position: relative;
-  }
-  .prompt-card:hover {
-    animation: breathe 1.5s ease-in-out infinite;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.1) !important;
-  }
-  .prompt-card .action-buttons {
-    opacity: 0;
-    transition: opacity 0.3s ease;
-  }
-  .prompt-card:hover .action-buttons {
-    opacity: 1;
-  }
-  .prompt-card .btn {
-    padding: 0.4rem 0.6rem;
-  }
-  .prompt-card .btn i {
-    font-size: 1rem;
-  }
-  .prompt-tags {
-    margin-top: 0.5rem;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.3rem;
-  }
-  .prompt-tag {
-    font-size: 0.8rem;
-    padding: 0.2rem 0.5rem;
-    background: #f0f0f0;
-    border-radius: 4px;
-    color: #666;
-  }
-  .prompt-content {
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    margin-bottom: 0.5rem;
-    color: #666;
-    font-size: 0.95rem;
-    line-height: 1.5;
-  }
-  .copy-success {
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(0, 0, 0, 0.8);
-    color: #fff;
-    padding: 10px 20px;
-    border-radius: 20px;
-    display: none;
-    z-index: 9999;
-  }
-  .copy-success.show {
-    display: flex;
-    align-items: center;
-  }
-  .toast-notification {
-    position: fixed;
-    top: 20px; /* Adjusted to be at the top */
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(40, 167, 69, 0.9); /* Greenish background for success */
-    color: #fff;
-    padding: 10px 20px;
-    border-radius: 20px;
-    display: none;
-    z-index: 9999;
-    align-items: center;
-    justify-content: center;
-  }
-  .toast-notification.show {
-    display: flex;
-  }
+    <style>
+        body {
+            background-color: #f8f8f8;
+        }
 
-  /* 聊天区域基础样式 */
-  #chatMessages {
-      display: flex;
-      flex-direction: column; /* 消息从上到下排列 */
-      gap: 10px; /* 消息间距 */
-      padding: 15px;
-      background-color: #f8f8f8; /* 浅灰色背景，模拟聊天软件 */
-      border-radius: 12px;
-      overflow-y: auto;
-      min-height: 0; /* 允许 flex item 缩小 */
-      height: auto; /* 自动高度 */
-      box-shadow: inset 0 0 5px rgba(0,0,0,0.05); /* 轻微内阴影 */
-  }
+        .navbar-brand {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #ff9800 !important;
+            display: flex;
+            align-items: center;
+        }
 
-  /* 初始提示消息样式 */
-  #chatMessages .initial-message {
-      text-align: center;
-      color: #999;
-      padding: 20px;
-      font-style: italic;
-      flex-grow: 1; /* 让提示消息在没有内容时占据大部分空间 */
-      display: flex;
-      align-items: center;
-      justify-content: center;
-  }
+        .navbar-brand img {
+            height: 35px;
+            margin-right: 10px;
+        }
 
-  /* 单条消息容器 */
-  .message {
-      display: flex;
-      align-items: flex-end; /* 消息内容底部对齐 */
-  }
+        .nav-link {
+            color: #222 !important;
+            font-weight: 500;
+        }
 
-  /* 用户消息 */
-  .user-message {
-      justify-content: flex-end; /* 靠右显示 */
-  }
+        .btn-primary {
+            background-color: #ff9800;
+            border-color: #ff9800;
+        }
 
-  .user-message .message-content {
-      background-color: #0d6efd; /* Bootstrap Primary Blue, 类似iMessage蓝色 */
-      color: #fff;
-      border-radius: 18px 18px 2px 18px; /* 右下角尖角 */
-      margin-left: auto; /* 确保靠右 */
-  }
+        .btn-primary:hover {
+            background-color: #e68900;
+            border-color: #e68900;
+        }
 
-  /* AI（助手）消息 */
-  .ai-message {
-      justify-content: flex-start; /* 靠左显示 */
-  }
+        .fw-bold, h3, h5, .modal-title {
+            color: #ff9800 !important;
+        }
 
-  .ai-message .message-content {
-      background-color: #e2e6ea; /* 浅灰色，模拟微信/iMessage的AI/对方消息 */
-      color: #333;
-      border-radius: 18px 18px 18px 2px; /* 左下角尖角 */
-      margin-right: auto; /* 确保靠左 */
-  }
+        .text-muted {
+            color: #888 !important;
+        }
 
-  /* 消息内容基础样式 */
-  .message-content {
-      max-width: 75%; /* 消息最大宽度 */
-      padding: 10px 15px;
-      font-size: 0.95rem;
-      line-height: 1.4;
-      word-wrap: break-word;
-      white-space: pre-wrap; /* 保留换行符和空格 */
-      box-shadow: 0 1px 2px rgba(0,0,0,0.1); /* 轻微阴影 */
-  }
+        .required-star {
+            color: #222; /* Changed to dark grey/black as per image */
+            margin-left: 0.2em;
+            font-size: 1em;
+            font-weight: bold;
+        }
 
-  /* Small adjustments for inputs to match the image precisely */
-  .form-control-sm {
-      height: calc(1.8rem + 2px); /* Adjust height for sm controls */
-      padding: 0.25rem 0.5rem;
-      font-size: 0.875rem;
-      border-radius: 0.2rem;
-  }
+        .select-multi {
+            /* This class is used for the select2 wrapper, ensuring consistent styling */
+            background: #f8f8f8;
+            color: #222;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            min-height: 44px;
+            padding: 0.5em 0.75em;
+            font-size: 1.1em;
+        }
 
-  /* Select2 Custom Styling */
-  .select2-container--default .select2-selection--multiple {
-    background-color: #fff; /* White background for input (Image 2) */
-    border-radius: 8px; /* Consistent rounded corners */
-    border: 1px solid #eee; /* Subtle border */
-    min-height: 44px; /* Consistent height */
-    padding: 6px 12px; /* Padding inside the input */
-    align-items: center; /* Vertically align tags and search input */
-    overflow-x: auto; /* Allow horizontal scrolling for tags */
-    white-space: nowrap; /* Prevent tags from wrapping */
-    display: flex; /* Use flexbox for layout of tags and search input */
-    width: 100%; /* Ensure it takes full width of its parent */
-  }
+        .select-multi option {
+            background: #fff;
+            color: #222;
+            font-size: 1em;
+        }
 
-  .select2-container--default.select2-container--focus .select2-selection--multiple {
-    border-color: #ff9800; /* Highlight border on focus */
-    box-shadow: 0 0 0 0.25rem rgba(255, 152, 0, 0.25); /* Focus shadow */
-  }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
 
-  .select2-container--default .select2-selection--multiple .select2-selection__choice {
-    background-color: #f0f0f0; /* Light grey for selected tags (Image 2) */
-    border: none; /* No border for flat look (Image 2) */
-    border-radius: 14px; /* Perfect pill shape for 28px height */
-    padding: 3px 8px; /* Adjusted padding for compactness (Image 2) */
-    color: #333; /* Darker text (Image 2) */
-    font-size: 0.9em; /* Consistent font size */
-    display: inline-flex; /* Use inline-flex for better horizontal alignment */
-    align-items: center;
-    gap: 4px; /* Smaller gap between text and 'x' */
-    margin-right: 6px; /* Spacing between tags */
-    height: 28px; /* Fixed height for consistent look */
-    vertical-align: middle; /* Align tags vertically with input */
-    flex-shrink: 0; /* Prevent tags from shrinking */
-  }
+        .animated-card {
+            animation: fadeIn 0.5s ease-out;
+        }
 
-  .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
-    color: #999; /* Grey 'x' color (Image 2) */
-    font-weight: normal; /* Normal weight for 'x' (Image 2) */
-    margin-left: 4px; /* Adjusted margin */
-    cursor: pointer;
-    font-size: 0.8em; /* Smaller 'x' */
-  }
+        /* Styling for form inputs to match the image */
+        .form-control,
+        .select2-container--default .select2-selection--single,
+        .select2-container--default .select2-selection--multiple {
+            background-color: #f8f8f8; /* Match image */
+            border-radius: 8px; /* Match image */
+            border: 1px solid #eee; /* Subtle border */
+        }
 
-  .select2-container--default .select2-selection--multiple .select2-selection__choice__remove:hover {
-    color: #555;
-  }
+        .form-control:hover,
+        .form-select:hover,
+        .select2-container--default .select2-selection--single:hover,
+        .select2-container--default .select2-selection--multiple:hover {
+            box-shadow: 0 0 0 2px #ff980033;
+        }
 
-  .select2-container--default .select2-selection--multiple .select2-selection__arrow {
-    height: 100%; /* Make arrow fill container height */
-    width: 20px; /* Adjust width of arrow area */
-    top: 0;
-    right: 5px;
-    position: absolute;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    pointer-events: none; /* Allow clicks to pass through to the main input */
-  }
-  .select2-container--default .select2-selection--multiple .select2-selection__arrow b {
-    border-color: #999 transparent transparent transparent; /* Grey arrow */
-    border-style: solid;
-    border-width: 5px 4px 0 4px;
-    height: 0;
-    left: 50%;
-    margin-left: -4px;
-    margin-top: -2px;
-    position: absolute;
-    top: 50%;
-    width: 0;
-  }
+        /* Styling for the light cancel button */
+        .btn-light {
+            background-color: #f8f8f8 !important; /* Make sure it's light */
+            border-color: #f8f8f8 !important; /* Remove border */
+        }
+
+        .btn-light:hover {
+            background-color: #e0e0e0 !important; /* Slightly darker on hover */
+            border-color: #e0e0e0 !important;
+        }
+
+        .form-control::placeholder {
+            color: #aaa !important;
+        }
+
+        @keyframes breathe {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.02);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .prompt-card {
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .prompt-card:hover {
+            animation: breathe 1.5s ease-in-out infinite;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1) !important;
+        }
+
+        .prompt-card .action-buttons {
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .prompt-card:hover .action-buttons {
+            opacity: 1;
+        }
+
+        .prompt-card .btn {
+            padding: 0.4rem 0.6rem;
+        }
+
+        .prompt-card .btn i {
+            font-size: 1rem;
+        }
+
+        .prompt-tags {
+            margin-top: 0.5rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.3rem;
+        }
+
+        .prompt-tag {
+            font-size: 0.8rem;
+            padding: 0.2rem 0.5rem;
+            background: #f0f0f0;
+            border-radius: 4px;
+            color: #666;
+        }
+
+        .prompt-content {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 0.5rem;
+            color: #666;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .copy-success {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 20px;
+            display: none;
+            z-index: 9999;
+        }
+
+        .copy-success.show {
+            display: flex;
+            align-items: center;
+        }
+
+        .toast-notification {
+            position: fixed;
+            top: 20px; /* Adjusted to be at the top */
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(40, 167, 69, 0.9); /* Greenish background for success */
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 20px;
+            display: none;
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .toast-notification.show {
+            display: flex;
+        }
+
+        /* 聊天区域基础样式 */
+        #chatMessages {
+            display: flex;
+            flex-direction: column; /* 消息从上到下排列 */
+            gap: 10px; /* 消息间距 */
+            padding: 15px;
+            background-color: #f8f8f8; /* 浅灰色背景，模拟聊天软件 */
+            border-radius: 12px;
+            overflow-y: auto;
+            min-height: 0; /* 允许 flex item 缩小 */
+            height: auto; /* 自动高度 */
+            box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.05); /* 轻微内阴影 */
+        }
+
+        /* 初始提示消息样式 */
+        #chatMessages .initial-message {
+            text-align: center;
+            color: #999;
+            padding: 20px;
+            font-style: italic;
+            flex-grow: 1; /* 让提示消息在没有内容时占据大部分空间 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* 单条消息容器 */
+        .message {
+            display: flex;
+            align-items: flex-end; /* 消息内容底部对齐 */
+        }
+
+        /* 用户消息 */
+        .user-message {
+            justify-content: flex-end; /* 靠右显示 */
+        }
+
+        .user-message .message-content {
+            background-color: #0d6efd; /* Bootstrap Primary Blue, 类似iMessage蓝色 */
+            color: #fff;
+            border-radius: 18px 18px 2px 18px; /* 右下角尖角 */
+            margin-left: auto; /* 确保靠右 */
+        }
+
+        /* AI（助手）消息 */
+        .ai-message {
+            justify-content: flex-start; /* 靠左显示 */
+        }
+
+        .ai-message .message-content {
+            background-color: #e2e6ea; /* 浅灰色，模拟微信/iMessage的AI/对方消息 */
+            color: #333;
+            border-radius: 18px 18px 18px 2px; /* 左下角尖角 */
+            margin-right: auto; /* 确保靠左 */
+        }
+
+        /* 消息内容基础样式 */
+        .message-content {
+            max-width: 75%; /* 消息最大宽度 */
+            padding: 10px 15px;
+            font-size: 0.95rem;
+            line-height: 1.4;
+            word-wrap: break-word;
+            white-space: pre-wrap; /* 保留换行符和空格 */
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* 轻微阴影 */
+        }
+
+        /* Small adjustments for inputs to match the image precisely */
+        .form-control-sm {
+            height: calc(1.8rem + 2px); /* Adjust height for sm controls */
+            padding: 0.25rem 0.5rem;
+            font-size: 0.875rem;
+            border-radius: 0.2rem;
+        }
+
+        /* Select2 Custom Styling */
+        .select2-container--default .select2-selection--multiple {
+            background-color: #fff; /* White background for input (Image 2) */
+            border-radius: 8px; /* Consistent rounded corners */
+            border: 1px solid #eee; /* Subtle border */
+            min-height: 44px; /* Consistent height */
+            padding: 6px 12px; /* Padding inside the input */
+            align-items: center; /* Vertically align tags and search input */
+            overflow-x: auto; /* Allow horizontal scrolling for tags */
+            white-space: nowrap; /* Prevent tags from wrapping */
+            display: flex; /* Use flexbox for layout of tags and search input */
+            width: 100%; /* Ensure it takes full width of its parent */
+        }
+
+        .select2-container--default.select2-container--focus .select2-selection--multiple {
+            border-color: #ff9800; /* Highlight border on focus */
+            box-shadow: 0 0 0 0.25rem rgba(255, 152, 0, 0.25); /* Focus shadow */
+        }
+
+        .select2-container--default .select2-selection--multiple .select2-selection__choice {
+            background-color: #f0f0f0; /* Light grey for selected tags (Image 2) */
+            border: none; /* No border for flat look (Image 2) */
+            border-radius: 14px; /* Perfect pill shape for 28px height */
+            padding: 3px 8px; /* Adjusted padding for compactness (Image 2) */
+            color: #333; /* Darker text (Image 2) */
+            font-size: 0.9em; /* Consistent font size */
+            display: inline-flex; /* Use inline-flex for better horizontal alignment */
+            align-items: center;
+            gap: 4px; /* Smaller gap between text and 'x' */
+            margin-right: 6px; /* Spacing between tags */
+            height: 28px; /* Fixed height for consistent look */
+            vertical-align: middle; /* Align tags vertically with input */
+            flex-shrink: 0; /* Prevent tags from shrinking */
+        }
+
+        .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+            color: #999; /* Grey 'x' color (Image 2) */
+            font-weight: normal; /* Normal weight for 'x' (Image 2) */
+            margin-left: 4px; /* Adjusted margin */
+            cursor: pointer;
+            font-size: 0.8em; /* Smaller 'x' */
+        }
+
+        .select2-container--default .select2-selection--multiple .select2-selection__choice__remove:hover {
+            color: #555;
+        }
+
+        .select2-container--default .select2-selection--multiple .select2-selection__arrow {
+            height: 100%; /* Make arrow fill container height */
+            width: 20px; /* Adjust width of arrow area */
+            top: 0;
+            right: 5px;
+            position: absolute;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none; /* Allow clicks to pass through to the main input */
+        }
+
+        .select2-container--default .select2-selection--multiple .select2-selection__arrow b {
+            border-color: #999 transparent transparent transparent; /* Grey arrow */
+            border-style: solid;
+            border-width: 5px 4px 0 4px;
+            height: 0;
+            left: 50%;
+            margin-left: -4px;
+            margin-top: -2px;
+            position: absolute;
+            top: 50%;
+            width: 0;
+        }
 
 
-  /* Dropdown results styling (Image 1) */
-  .select2-results__option {
-    background-color: white; /* Default background for options (Image 1) */
-    color: #333; /* Default text color */
-    padding: 8px 12px; /* Padding for dropdown options */
-    display: block; /* Ensure each tag is on its own line */
-  }
+        /* Dropdown results styling (Image 1) */
+        .select2-results__option {
+            background-color: white; /* Default background for options (Image 1) */
+            color: #333; /* Default text color */
+            padding: 8px 12px; /* Padding for dropdown options */
+            display: block; /* Ensure each tag is on its own line */
+        }
 
-  .select2-results__option--highlighted.select2-results__option--selectable {
-    background-color: #f0f0f0 !important; /* Light grey on hover/highlight (Image 1) */
-    color: #333 !important; /* Darker text on highlight (Image 1) */
-  }
+        .select2-results__option--highlighted.select2-results__option--selectable {
+            background-color: #f0f0f0 !important; /* Light grey on hover/highlight (Image 1) */
+            color: #333 !important; /* Darker text on highlight (Image 1) */
+        }
 
-  .select2-results__option[aria-selected=true] {
-    background-color: white !important; /* Keep background white if already selected and re-opened */
-    color: #333 !important;
-  }
+        .select2-results__option[aria-selected=true] {
+            background-color: white !important; /* Keep background white if already selected and re-opened */
+            color: #333 !important;
+        }
 
-  .select2-dropdown {
-    border-radius: 8px; /* Match input border radius */
-    border: 1px solid #eee; /* Consistent border */
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1); /* Subtle shadow */
-  }
+        .select2-dropdown {
+            border-radius: 8px; /* Match input border radius */
+            border: 1px solid #eee; /* Consistent border */
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+        }
 
-  .select2-container .select2-selection--single .select2-selection__rendered {
-      padding-left: 12px; /* Adjust padding for single select */
-      line-height: 44px; /* Vertically center text */
-  }
+        .select2-container .select2-selection--single .select2-selection__rendered {
+            padding-left: 12px; /* Adjust padding for single select */
+            line-height: 44px; /* Vertically center text */
+        }
 
-  .pm-main-flex {
-    display: flex;
-    flex-direction: row;
-    align-items: flex-start;
-    gap: 0;
-    min-height: 80vh;
-  }
-  #menuSidebar {
-    width: 240px;
-    min-width: 200px;
-    background: #fff;
-    border-radius: 12px;
-    box-shadow: 0 2px 12px #0001;
-    padding: 1.2rem 0.7rem;
-    min-height: 600px;
-    margin-right: 2.2rem;
-    margin-top: 0.5rem;
-  }
-  @media (max-width: 900px) {
-    .pm-main-flex { flex-direction: column; }
-    #menuSidebar { width: 100%; min-width: 0; margin-right: 0; margin-bottom: 1.2rem; }
-  }
-</style>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-{% if mode == 'list' %}
-<div class="pm-main-flex">
-  <!-- 左侧菜单分类栏 -->
-  <div id="menuSidebar">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-      <span class="fw-bold" style="font-size: 1.15rem;"><i class="bi bi-list-ul me-2"></i>菜单分类</span>
-      <button class="btn btn-sm btn-outline-primary" id="addMenuBtn" title="新增分类" type="button"><i class="bi bi-plus"></i></button>
-    </div>
-    <ul class="list-unstyled" id="menuTree" style="margin-bottom: 1.2rem;"></ul>
-    <div id="menuEditArea" style="display:none;">
-      <input type="text" class="form-control form-control-sm mb-2" id="menuNameInput" placeholder="输入分类名称">
-      <div class="d-flex gap-2">
-        <button class="btn btn-sm btn-primary" id="saveMenuBtn" type="button">保存</button>
-        <button class="btn btn-sm btn-light" id="cancelMenuBtn" type="button">取消</button>
-      </div>
-    </div>
-  </div>
-  <!-- 右侧主内容区 -->
-  <div class="container py-4 flex-grow-1">
-    <div class="d-flex justify-content-between align-items-center mt-4 mb-3">
-      <h3 class="fw-bold d-flex align-items-center">
-        <i class="bi bi-folder2-open" style="color:#ff9800;font-size:2rem;margin-right:0.5rem;"></i>
-        提示词库
-      </h3>
-      <span class="text-muted">共 {{ prompts.count }} 个提示词</span>
-    </div>
-    <div class="d-flex justify-content-between align-items-center mb-3">
-      <form class="d-flex flex-grow-1 me-3" action="{% url 'prompt_list' %}" method="get">
-        <div class="input-group">
-          <span class="input-group-text"><i class="bi bi-search"></i></span>
-          <input type="text" class="form-control" placeholder="搜索提示词..." name="q" value="{{ request.GET.q|default_if_none:'' }}">
+        .pm-main-flex {
+            display: flex;
+            flex-direction: row;
+            align-items: flex-start;
+            gap: 0;
+            min-height: 80vh;
+        }
+
+        #menuSidebar {
+            width: 240px;
+            min-width: 200px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px #0001;
+            padding: 1.2rem 0.7rem;
+            min-height: 600px;
+            margin-right: 2.2rem;
+            margin-top: 0.5rem;
+        }
+
+        @media (max-width: 900px) {
+            .pm-main-flex {
+                flex-direction: column;
+            }
+
+            #menuSidebar {
+                width: 100%;
+                min-width: 0;
+                margin-right: 0;
+                margin-bottom: 1.2rem;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet"/>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    {% if mode == 'list' %}
+        <div class="pm-main-flex">
+            <!-- 左侧菜单分类栏 -->
+            <div id="menuSidebar">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="fw-bold" style="font-size: 1.15rem;"><i class="bi bi-list-ul me-2"></i>菜单分类</span>
+                    <button class="btn btn-sm btn-outline-primary" id="addMenuBtn" title="新增分类" type="button"><i
+                            class="bi bi-plus"></i></button>
+                </div>
+                <ul class="list-unstyled" id="menuTree" style="margin-bottom: 1.2rem;"></ul>
+                <div id="menuEditArea" style="display:none;">
+                    <input type="text" class="form-control form-control-sm mb-2" id="menuNameInput"
+                           placeholder="输入分类名称">
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-sm btn-primary" id="saveMenuBtn" type="button">保存</button>
+                        <button class="btn btn-sm btn-light" id="cancelMenuBtn" type="button">取消</button>
+                    </div>
+                </div>
+            </div>
+            <!-- 右侧主内容区 -->
+            <div class="container py-4 flex-grow-1">
+                <div class="d-flex justify-content-between align-items-center mt-4 mb-3">
+                    <h3 class="fw-bold d-flex align-items-center">
+                        <i class="bi bi-folder2-open" style="color:#ff9800;font-size:2rem;margin-right:0.5rem;"></i>
+                        提示词库
+                    </h3>
+                    <span class="text-muted">共 {{ prompts.count }} 个提示词</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <form class="d-flex flex-grow-1 me-3" action="{% url 'prompt_list' %}" method="get">
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-search"></i></span>
+                            <input type="text" class="form-control" placeholder="搜索提示词..." name="q"
+                                   value="{{ request.GET.q|default_if_none:'' }}">
+                        </div>
+                    </form>
+                    <a href="{% url 'tag_manage' %}" class="btn btn-outline-secondary rounded-3"><i
+                            class="bi bi-tags"></i> 标签管理</a>
+                </div>
+                <div class="row g-4" id="promptCardList">
+                    {% for prompt in prompts %}
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <div class="card shadow-sm h-100 prompt-card" style="cursor:pointer;"
+                                 onclick="window.location.href='{% url 'prompt_detail' pk=prompt.id %}'">
+                                <div class="card-body">
+                                    <h5 class="card-title"><i class="bi bi-lightning-charge"></i> {{ prompt.title }}
+                                    </h5>
+                                    <div class="prompt-content">{{ prompt.content|linebreaksbr }}</div>
+                                    <div class="prompt-tags">
+                                        {% for tag in prompt.tags.all %}
+                                            <span class="prompt-tag">{{ tag.name }}</span>
+                                        {% endfor %}
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center mt-3">
+                                        <div>
+                                            <span class="badge bg-light text-dark">v{{ prompt.version }}</span>
+                                        </div>
+                                        <div class="action-buttons">
+                                            <button class="btn btn-sm btn-outline-primary me-1"
+                                                    onclick="event.stopPropagation(); copyToClipboard('{{ prompt.content|escapejs }}')"
+                                                    data-bs-toggle="tooltip" title="复制内容"><i
+                                                    class="bi bi-clipboard"></i></button>
+                                            <a href="{% url 'prompt_edit' pk=prompt.id %}"
+                                               class="btn btn-sm btn-outline-secondary me-1"
+                                               onclick="event.stopPropagation();" data-bs-toggle="tooltip" title="编辑"><i
+                                                    class="bi bi-pencil"></i></a>
+                                            <button type="button" class="btn btn-sm btn-outline-danger"
+                                                    data-bs-toggle="modal" data-bs-target="#deletePromptModal"
+                                                    data-bs-prompt-id="{{ prompt.id }}"
+                                                    onclick="event.stopPropagation();" title="删除"><i
+                                                    class="bi bi-trash"></i></button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <div class="col-12 text-center text-muted">暂无提示词</div>
+                    {% endfor %}
+                </div>
+            </div>
         </div>
-      </form>
-      <a href="{% url 'tag_manage' %}" class="btn btn-outline-secondary rounded-3"><i class="bi bi-tags"></i> 标签管理</a>
-    </div>
-    <div class="row g-4" id="promptCardList">
-      {% for prompt in prompts %}
-      <div class="col-12 col-md-6 col-lg-4">
-        <div class="card shadow-sm h-100 prompt-card" style="cursor:pointer;" onclick="window.location.href='{% url 'prompt_detail' pk=prompt.id %}'">
-          <div class="card-body">
-            <h5 class="card-title"><i class="bi bi-lightning-charge"></i> {{ prompt.title }}</h5>
-            <div class="prompt-content">{{ prompt.content|linebreaksbr }}</div>
-            <div class="prompt-tags">
-              {% for tag in prompt.tags.all %}
-                <span class="prompt-tag">{{ tag.name }}</span>
-              {% endfor %}
-            </div>
-            <div class="d-flex justify-content-between align-items-center mt-3">
-              <div>
-                <span class="badge bg-light text-dark">v{{ prompt.version }}</span>
-              </div>
-              <div class="action-buttons">
-                <button class="btn btn-sm btn-outline-primary me-1" onclick="event.stopPropagation(); copyToClipboard('{{ prompt.content|escapejs }}')" data-bs-toggle="tooltip" title="复制内容"><i class="bi bi-clipboard"></i></button>
-                <a href="{% url 'prompt_edit' pk=prompt.id %}" class="btn btn-sm btn-outline-secondary me-1" onclick="event.stopPropagation();" data-bs-toggle="tooltip" title="编辑"><i class="bi bi-pencil"></i></a>
-                <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deletePromptModal" data-bs-prompt-id="{{ prompt.id }}" onclick="event.stopPropagation();" title="删除"><i class="bi bi-trash"></i></button>
-              </div>
-            </div>
-          </div>
+        <script>
+            function renderMenuTree(menus, parentUl, selectedId) {
+                parentUl.innerHTML = '';
+                menus.forEach(function (menu) {
+                    var li = document.createElement('li');
+                    li.className = 'd-flex align-items-center justify-content-between mb-1';
+                    li.style.padding = '0.2rem 0.3rem';
+                    li.style.borderRadius = '6px';
+                    li.style.cursor = 'pointer';
+                    if (menu.id === selectedId) li.style.background = '#fff7e6';
+                    li.innerHTML = '<span class="menu-name" data-id="' + menu.id + '"><i class="bi bi-folder2-open me-1"></i>' + menu.name + '</span>' +
+                        '<span>' +
+                        '<button class="btn btn-sm btn-link text-primary p-0 me-1 edit-menu-btn" data-id="' + menu.id + '" title="编辑"><i class="bi bi-pencil"></i></button>' +
+                        '<button class="btn btn-sm btn-link text-danger p-0 del-menu-btn" data-id="' + menu.id + '" title="删除"><i class="bi bi-trash"></i></button>' +
+                        '</span>';
+                    parentUl.appendChild(li);
+                    if (menu.children && menu.children.length > 0) {
+                        var childUl = document.createElement('ul');
+                        childUl.className = 'list-unstyled ms-3';
+                        li.appendChild(childUl);
+                        renderMenuTree(menu.children, childUl, selectedId);
+                    }
+                    li.querySelector('.menu-name').onclick = function (e) {
+                        e.stopPropagation();
+                        document.querySelectorAll('#menuTree .menu-name').forEach(function (el) {
+                            el.parentElement.style.background = '';
+                        });
+                        li.style.background = '#fff7e6';
+                    };
+                    li.querySelector('.edit-menu-btn').onclick = function (e) {
+                        e.stopPropagation();
+                        showMenuEdit(menu);
+                    };
+                    li.querySelector('.del-menu-btn').onclick = function (e) {
+                        e.stopPropagation();
+                        if (confirm('确定删除该分类？')) {
+                            fetch('/api/menus/' + menu.id + '/', {method: 'DELETE'}).then(function (r) {
+                                return r.json();
+                            }).then(function (data) {
+                                if (data.success) loadMenus(); else alert(data.error);
+                            });
+                        }
+                    };
+                });
+            }
+
+            var editingMenu = null;
+
+            function showMenuEdit(menu) {
+                editingMenu = menu;
+                document.getElementById('menuEditArea').style.display = 'block';
+                document.getElementById('menuNameInput').value = menu ? menu.name : '';
+            }
+
+            function hideMenuEdit() {
+                editingMenu = null;
+                document.getElementById('menuEditArea').style.display = 'none';
+                document.getElementById('menuNameInput').value = '';
+            }
+
+            function loadMenus() {
+                fetch('/api/menus/').then(function (r) {
+                    return r.json();
+                }).then(function (data) {
+                    if (data.success) renderMenuTree(data.menus, document.getElementById('menuTree'));
+                });
+            }
+
+            document.addEventListener('DOMContentLoaded', function () {
+                document.getElementById('addMenuBtn').onclick = function () {
+                    showMenuEdit(null);
+                };
+                document.getElementById('cancelMenuBtn').onclick = hideMenuEdit;
+                document.getElementById('saveMenuBtn').onclick = function () {
+                    var name = document.getElementById('menuNameInput').value.trim();
+                    if (!name) return alert('请输入分类名称');
+                    if (editingMenu) {
+                        fetch('/api/menus/' + editingMenu.id + '/', {
+                            method: 'PUT',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({name: name})
+                        })
+                            .then(function (r) {
+                                return r.json();
+                            }).then(function (data) {
+                            if (data.success) {
+                                loadMenus();
+                                hideMenuEdit();
+                            } else alert(data.error);
+                        });
+                    } else {
+                        fetch('/api/menus/', {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({name: name})
+                        })
+                            .then(function (r) {
+                                return r.json();
+                            }).then(function (data) {
+                            if (data.success) {
+                                loadMenus();
+                                hideMenuEdit();
+                            } else alert(data.error);
+                        });
+                    }
+                };
+                loadMenus();
+            });
+        </script>
+    {% elif mode == 'create' %}
+        <div class="d-flex justify-content-between align-items-center mt-4 mb-3">
+            <h3 class="fw-bold d-flex align-items-center">
+                <i class="bi bi-plus-circle me-2" style="color:#ff9800;font-size:2rem;margin-right:0.5rem;"></i>
+                创建新提示词
+            </h3>
         </div>
-      </div>
-      {% empty %}
-      <div class="col-12 text-center text-muted">暂无提示词</div>
-      {% endfor %}
-    </div>
-  </div>
-</div>
-<script>
-function renderMenuTree(menus, parentUl, selectedId) {
-  parentUl.innerHTML = '';
-  menus.forEach(function(menu) {
-    var li = document.createElement('li');
-    li.className = 'd-flex align-items-center justify-content-between mb-1';
-    li.style.padding = '0.2rem 0.3rem';
-    li.style.borderRadius = '6px';
-    li.style.cursor = 'pointer';
-    if (menu.id === selectedId) li.style.background = '#fff7e6';
-    li.innerHTML = '<span class="menu-name" data-id="' + menu.id + '"><i class="bi bi-folder2-open me-1"></i>' + menu.name + '</span>' +
-      '<span>' +
-        '<button class="btn btn-sm btn-link text-primary p-0 me-1 edit-menu-btn" data-id="' + menu.id + '" title="编辑"><i class="bi bi-pencil"></i></button>' +
-        '<button class="btn btn-sm btn-link text-danger p-0 del-menu-btn" data-id="' + menu.id + '" title="删除"><i class="bi bi-trash"></i></button>' +
-      '</span>';
-    parentUl.appendChild(li);
-    if (menu.children && menu.children.length > 0) {
-      var childUl = document.createElement('ul');
-      childUl.className = 'list-unstyled ms-3';
-      li.appendChild(childUl);
-      renderMenuTree(menu.children, childUl, selectedId);
-    }
-    li.querySelector('.menu-name').onclick = function(e) {
-      e.stopPropagation();
-      document.querySelectorAll('#menuTree .menu-name').forEach(function(el) { el.parentElement.style.background = ''; });
-      li.style.background = '#fff7e6';
-    };
-    li.querySelector('.edit-menu-btn').onclick = function(e) {
-      e.stopPropagation();
-      showMenuEdit(menu);
-    };
-    li.querySelector('.del-menu-btn').onclick = function(e) {
-      e.stopPropagation();
-      if (confirm('确定删除该分类？')) {
-        fetch('/api/menus/' + menu.id + '/', {method: 'DELETE'}).then(function(r) { return r.json(); }).then(function(data) { if(data.success) loadMenus(); else alert(data.error); });
-      }
-    };
-  });
-}
-var editingMenu = null;
-function showMenuEdit(menu) {
-  editingMenu = menu;
-  document.getElementById('menuEditArea').style.display = 'block';
-  document.getElementById('menuNameInput').value = menu ? menu.name : '';
-}
-function hideMenuEdit() {
-  editingMenu = null;
-  document.getElementById('menuEditArea').style.display = 'none';
-  document.getElementById('menuNameInput').value = '';
-}
-function loadMenus() {
-  fetch('/api/menus/').then(function(r) { return r.json(); }).then(function(data) {
-    if(data.success) renderMenuTree(data.menus, document.getElementById('menuTree'));
-  });
-}
-document.addEventListener('DOMContentLoaded', function() {
-  document.getElementById('addMenuBtn').onclick = function() { showMenuEdit(null); };
-  document.getElementById('cancelMenuBtn').onclick = hideMenuEdit;
-  document.getElementById('saveMenuBtn').onclick = function() {
-    var name = document.getElementById('menuNameInput').value.trim();
-    if (!name) return alert('请输入分类名称');
-    if (editingMenu) {
-      fetch('/api/menus/' + editingMenu.id + '/', {method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({name: name})})
-        .then(function(r) { return r.json(); }).then(function(data) { if(data.success) { loadMenus(); hideMenuEdit(); } else alert(data.error); });
-    } else {
-      fetch('/api/menus/', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({name: name})})
-        .then(function(r) { return r.json(); }).then(function(data) { if(data.success) { loadMenus(); hideMenuEdit(); } else alert(data.error); });
-    }
-  };
-  loadMenus();
-});
-</script>
-{% elif mode == 'create' %}
-<div class="d-flex justify-content-between align-items-center mt-4 mb-3">
-    <h3 class="fw-bold d-flex align-items-center">
-    <i class="bi bi-plus-circle me-2" style="color:#ff9800;font-size:2rem;margin-right:0.5rem;"></i>
-    创建新提示词
-    </h3>
-</div>
-<div class="card shadow-lg p-4 animated-card" style="background:#fff;color:#222;max-width:1200px;margin:auto;">
-  <form method="post" action="{% url 'prompt_create' %}">
-    {% csrf_token %}
-    {{ form.non_field_errors }}
-    <div class="mb-3">
-      <label for="id_title" class="form-label fw-bold"><i class="bi bi-type-h1 me-2"></i>标题 <span class="required-star" style="color:#dc3545;">*</span></label>
-      <input type="text" name="title" id="id_title" class="form-control" value="{{ form.title.value|default_if_none:'' }}" placeholder="为你的提示词起个醒目的标题" style="color:#222;">
-    </div>
-    <div class="mb-3">
-      <label for="id_content" class="form-label fw-bold"><i class="bi bi-card-text me-2"></i>提示词内容 <span class="required-star" style="color:#dc3545;">*</span></label>
-      <textarea name="content" id="id_content" class="form-control" rows="10" placeholder="在这里输入你的提示词内容，可以包含具体的指令、上下文要求等" style="color:#222;">{{ form.content.value|default_if_none:'' }}</textarea>
-    </div>
-    <div class="mb-3">
-      <label for="id_description" class="form-label fw-bold"><i class="bi bi-info-circle me-2"></i>描述</label>
-      <textarea name="description" id="id_description" class="form-control" rows="5" placeholder="简要描述这个提示词的用途和使用场景" style="color:#222;">{{ form.description.value|default_if_none:'' }}</textarea>
-    </div>
-    <div class="mb-3">
-      <label for="id_tags" class="form-label fw-bold"><i class="bi bi-tags me-2"></i>标签</label>
-      {{ form.tags }}<div class="form-text text-muted">可多选</div>
-    </div>
-    <div class="mb-4">
-      <label for="id_version" class="form-label fw-bold"><i class="bi bi-123 me-2"></i>版本</label>
-      <input type="text" name="version" id="id_version" class="form-control" value="{{ form.version.value|default_if_none:'' }}" placeholder="1.0.0" style="color:#222;">
-      <div class="form-text text-muted">建议使用语义化版本号，例如: 1.0.0</div>
-    </div>
-    <div class="d-flex gap-2 justify-content-start mt-4">
-      <button type="submit" class="btn btn-primary px-4 py-2">创建</button>
-      <a href="{% url 'prompt_list' %}" class="btn btn-light text-dark px-4 py-2">取消</a>
-    </div>
-  </form>
-</div>
-{% elif mode == 'edit' %}
-<div class="d-flex justify-content-between align-items-center mt-4 mb-3">
-    <h3 class="fw-bold d-flex align-items-center">
-        <i class="bi bi-pencil-square me-2" style="color:#ff9800;font-size:2rem;margin-right:0.5rem;"></i>
-        编辑提示词
-    </h3>
-</div>
-<div class="card shadow-lg p-4 animated-card" style="background:#fff;color:#222;max-width:1200px;margin:auto;">
-  <form method="post" action="{% url 'prompt_edit' pk=prompt.id %}">
-    {% csrf_token %}
-    {{ form.non_field_errors }}
-    <div class="mb-3">
-      <label for="id_title" class="form-label fw-bold"><i class="bi bi-type-h1 me-2"></i>标题 <span class="required-star" style="color:#dc3545;">*</span></label>
-      <input type="text" name="title" id="id_title" class="form-control" value="{{ form.title.value|default_if_none:'' }}" placeholder="为你的提示词起个醒目的标题" style="color:#222;">
-    </div>
-    <div class="mb-3">
-      <label for="id_content" class="form-label fw-bold"><i class="bi bi-card-text me-2"></i>提示词内容 <span class="required-star" style="color:#dc3545;">*</span></label>
-      <textarea name="content" id="id_content" class="form-control" rows="10" placeholder="在这里输入你的提示词内容，可以包含具体的指令、上下文要求等" style="color:#222;">{{ form.content.value|default_if_none:'' }}</textarea>
-    </div>
-    <div class="mb-3">
-      <label for="id_description" class="form-label fw-bold"><i class="bi bi-info-circle me-2"></i>描述</label>
-      <textarea name="description" id="id_description" class="form-control" rows="5" placeholder="简要描述这个提示词的用途和使用场景" style="color:#222;">{{ form.description.value|default_if_none:'' }}</textarea>
-    </div>
-    <div class="mb-3">
-      <label for="id_tags" class="form-label fw-bold"><i class="bi bi-tags me-2"></i>标签</label>
-      {{ form.tags }}<div class="form-text text-muted">可多选</div>
-    </div>
-    <div class="mb-4">
-      <label for="id_version" class="form-label fw-bold"><i class="bi bi-123 me-2"></i>版本</label>
-      <input type="text" name="version" id="id_version" class="form-control" value="{{ form.version.value|default_if_none:'' }}" placeholder="1.0.0" style="color:#222;">
-      <div class="form-text text-muted">建议使用语义化版本号，例如: 1.0.0</div>
-    </div>
-    <div class="d-flex gap-2 justify-content-start mt-4">
-      <button type="submit" class="btn btn-primary px-4 py-2">保存</button>
-      <a href="{% url 'prompt_list' %}" class="btn btn-light text-dark px-4 py-2">返回</a>
-    </div>
-  </form>
-</div>
-{% elif mode == 'detail' %}
-<div class="container py-5 d-flex justify-content-center" style="min-height:1100px;">
-  <div class="card shadow-lg p-4 w-100" style="max-width:1400px; min-height:1000px; border-radius:28px; background:#fff;">
-    <div class="mb-4">
-      <a href="{% url 'prompt_list' %}" class="btn btn-outline-secondary" style="min-width:120px;"><i class="bi bi-arrow-left"></i> 返回列表</a>
-    </div>
-    <div class="row g-4 align-items-stretch" style="min-height:900px;">
-      <!-- 左侧：提示词详情卡片 -->
-      <div class="col-12 col-lg-6 d-flex align-items-stretch">
-        <div class="card shadow-sm p-4 flex-fill w-100 position-relative" style="background:#fff;color:#222;border-radius:18px;min-height:900px;">
-          <div class="d-flex justify-content-between align-items-center mb-3">
-            <div>
-              <h2 class="fw-bold mb-1" style="color:#ff9800;font-size:2.2rem;">{{ prompt.title }}</h2>
-              <div class="d-flex align-items-center flex-wrap text-muted" style="font-size:0.98rem;gap:1.2rem;">
-                <span><i class="bi bi-calendar-event"></i> {{ prompt.updated_at|date:'n/j/Y' }}</span>
-                <span><i class="bi bi-person"></i> {{ prompt.owner.username }}</span>
-                <span><i class="bi bi-123"></i> v{{ prompt.version }}</span>
-                {% for tag in prompt.tags.all %}
-                  <span class="badge bg-light text-dark border" style="color:#ff9800;border-radius:8px;font-weight:500;margin-right:0.3em;">{{ tag.name }}</span>
-                {% endfor %}
-              </div>
-            </div>
-            <div class="btn-group" role="group">
-              <button type="button" class="btn btn-outline-primary" id="editPromptBtn" title="编辑"><i class="bi bi-pencil"></i></button>
-              <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deletePromptModal" data-bs-prompt-id="{{ prompt.id }}" title="删除"><i class="bi bi-trash"></i></button>
-              <button type="button" class="btn btn-outline-secondary" onclick="copyToClipboard('{{ prompt.content|escapejs }}')" title="复制内容"><i class="bi bi-clipboard"></i></button>
-            </div>
-          </div>
-          <hr style="margin:1.2rem 0;">
-          <div class="mb-4">
-            <h5 class="mb-2" style="color:#ff9800;"><i class="bi bi-card-text"></i> 提示词内容</h5>
-            <div id="promptContentContainer">
-              <div id="promptContentDisplay" style="white-space:pre-line;font-size:1.1rem;line-height:1.7;">{{ prompt.content }}</div>
-              <textarea id="promptContentEdit" class="form-control" rows="15" style="display:none; font-size:1.1rem; line-height:1.7; background-color: #f8f8f8; border-radius: 8px; border: 1px solid #eee; color: #222;"></textarea>
-            </div>
-            <div class="d-flex justify-content-end mt-2" id="editControls" style="display:none;">
-              <button type="button" class="btn btn-primary btn-sm me-2" id="savePromptBtn"><i class="bi bi-save"></i> 保存</button>
-              <button type="button" class="btn btn-outline-secondary btn-sm" id="cancelEditBtn"><i class="bi bi-x-lg"></i> 取消</button>
-            </div>
-          </div>
-          {% if prompt.description %}
-          <div class="mb-4">
-            <h6 style="color:#ff9800;"><i class="bi bi-info-circle"></i> 描述</h6>
-            <div style="font-size:1rem;">{{ prompt.description }}</div>
-          </div>
-          {% endif %}
-          <!-- 右下角最后更新 -->
-          <div style="position:absolute;right:2rem;bottom:2rem;">
-            <span class="text-muted" style="font-size:0.95rem;">最后更新：{{ prompt.updated_at|date:'Y-m-d H:i' }}</span>
-          </div>
-        </div>
-      </div>
-      <!-- 右侧：对话区 -->
-      <div class="col-12 col-lg-6 d-flex align-items-stretch">
-        <div class="card shadow-sm p-4 flex-fill w-100 d-flex flex-column" style="background:#fafbfc;border-radius:18px;min-height:900px;">
-          <div class="d-flex justify-content-between align-items-center mb-3">
-            <div class="fw-bold" style="font-size:1.3rem;"><i class="bi bi-chat-dots"></i> 对话测试区</div>
-            <div>
-              <span class="badge bg-light text-dark me-2">{{ prompt.title }}</span>
-              <button type="button" class="btn btn-outline-danger btn-sm" id="clearChatBtn" title="清空对话"><i class="bi bi-trash3"></i> 清空</button>
-            </div>
-          </div>
-          <div class="mb-3">
-            <form class="row g-2 align-items-center">
-              <div class="col-12 mb-2">
-                <label for="chatModel" class="form-label mb-0 fw-bold">选择模型</label>
-                <select id="chatModel" class="form-select form-select-sm">
-                  <!-- Options will be loaded dynamically -->
-                </select>
-              </div>
-              <div class="col-auto">
-                <label for="chatTemperature" class="form-label mb-0 fw-bold">Temperature</label>
-              </div>
-              <div class="col-auto">
-                <input type="number" step="0.01" min="0" max="2" id="chatTemperature" class="form-control form-control-sm" value="0.7" style="width:70px;">
-              </div>
-              <div class="col-auto">
-                <label for="chatMaxTokens" class="form-label mb-0 fw-bold">Max Tokens</label>
-              </div>
-              <div class="col-auto">
-                <input type="number" min="1" max="4096" id="chatMaxTokens" class="form-control form-control-sm" value="2000" style="width:80px;">
-              </div>
-              <div class="col-auto">
-                <label for="chatTopP" class="form-label mb-0 fw-bold">Top P</label>
-              </div>
-              <div class="col-auto">
-                <input type="number" step="0.01" min="0" max="1" id="chatTopP" class="form-control form-control-sm" value="0.7" style="width:70px;">
-              </div>
+        <div class="card shadow-lg p-4 animated-card" style="background:#fff;color:#222;max-width:1200px;margin:auto;">
+            <form method="post" action="{% url 'prompt_create' %}">
+                {% csrf_token %}
+                {{ form.non_field_errors }}
+                <div class="mb-3">
+                    <label for="id_title" class="form-label fw-bold"><i class="bi bi-type-h1 me-2"></i>标题 <span
+                            class="required-star" style="color:#dc3545;">*</span></label>
+                    <input type="text" name="title" id="id_title" class="form-control"
+                           value="{{ form.title.value|default_if_none:'' }}" placeholder="为你的提示词起个醒目的标题"
+                           style="color:#222;">
+                </div>
+                <div class="mb-3">
+                    <label for="id_content" class="form-label fw-bold"><i class="bi bi-card-text me-2"></i>提示词内容
+                        <span class="required-star" style="color:#dc3545;">*</span></label>
+                    <textarea name="content" id="id_content" class="form-control" rows="10"
+                              placeholder="在这里输入你的提示词内容，可以包含具体的指令、上下文要求等"
+                              style="color:#222;">{{ form.content.value|default_if_none:'' }}</textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="id_description" class="form-label fw-bold"><i
+                            class="bi bi-info-circle me-2"></i>描述</label>
+                    <textarea name="description" id="id_description" class="form-control" rows="5"
+                              placeholder="简要描述这个提示词的用途和使用场景"
+                              style="color:#222;">{{ form.description.value|default_if_none:'' }}</textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="id_tags" class="form-label fw-bold d-block"><i class="bi bi-tags me-2"></i>标签</label>
+                    <div>
+                        {{ form.tags }}
+                        <div class="form-text text-muted">可多选</div>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="id_menu" class="form-label fw-bold d-block"><i class="bi bi-list-ul me-2"></i>分类 <span
+                            class="required-star" style="color:#dc3545;">*</span></label>
+                    <div>
+                        {{ form.menu }}
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label for="id_version" class="form-label fw-bold"><i class="bi bi-123 me-2"></i>版本</label>
+                    <input type="text" name="version" id="id_version" class="form-control"
+                           value="{{ form.version.value|default_if_none:'' }}" placeholder="1.0.0" style="color:#222;">
+                    <div class="form-text text-muted">建议使用语义化版本号，例如: 1.0.0</div>
+                </div>
+                <div class="d-flex gap-2 justify-content-start mt-4">
+                    <button type="submit" class="btn btn-primary px-4 py-2">创建</button>
+                    <a href="{% url 'prompt_list' %}" class="btn btn-light text-dark px-4 py-2">取消</a>
+                </div>
             </form>
-          </div>
-          <hr class="my-3">
-          <!-- 聊天消息区最大化 -->
-          <div id="chatMessages" class="flex-grow-1" style="min-height:0;height:auto;overflow-y:auto;background:#f8f8f8;border-radius:12px;padding:15px;margin-bottom:1.2rem;box-shadow:inset 0 0 5px rgba(0,0,0,0.05);">
-            <div id="initialChatMessage" class="initial-message">开始一段对话吧，左侧提示词内容将作为系统提示词参与对话。</div>
-          </div>
-          <!-- 输入区固定底部 -->
-          <form id="chatInputForm" class="d-flex align-items-center gap-2 mt-auto">
-            <input type="text" id="chatInput" class="form-control" placeholder="输入消息..." autocomplete="off">
-            <button type="submit" class="btn btn-primary"><i class="bi bi-send"></i></button>
-          </form>
         </div>
-      </div>
+        <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+        <script>
+            $(function () {
+                $('#id_tags').select2({
+                    width: '100%',
+                    placeholder: '请选择标签',
+                    allowClear: true,
+                    closeOnSelect: false
+                });
+                $('#id_menu').select2({
+                    width: '100%',
+                    placeholder: '请选择分类',
+                    minimumResultsForSearch: 8
+                });
+            });
+        </script>
+    {% elif mode == 'edit' %}
+        <div class="d-flex justify-content-between align-items-center mt-4 mb-3">
+            <h3 class="fw-bold d-flex align-items-center">
+                <i class="bi bi-pencil-square me-2" style="color:#ff9800;font-size:2rem;margin-right:0.5rem;"></i>
+                编辑提示词
+            </h3>
+        </div>
+        <div class="card shadow-lg p-4 animated-card" style="background:#fff;color:#222;max-width:1200px;margin:auto;">
+            <form method="post" action="{% url 'prompt_edit' pk=prompt.id %}">
+                {% csrf_token %}
+                {{ form.non_field_errors }}
+                <div class="mb-3">
+                    <label for="id_title" class="form-label fw-bold"><i class="bi bi-type-h1 me-2"></i>标题 <span
+                            class="required-star" style="color:#dc3545;">*</span></label>
+                    <input type="text" name="title" id="id_title" class="form-control"
+                           value="{{ form.title.value|default_if_none:'' }}" placeholder="为你的提示词起个醒目的标题"
+                           style="color:#222;">
+                </div>
+                <div class="mb-3">
+                    <label for="id_content" class="form-label fw-bold"><i class="bi bi-card-text me-2"></i>提示词内容
+                        <span class="required-star" style="color:#dc3545;">*</span></label>
+                    <textarea name="content" id="id_content" class="form-control" rows="10"
+                              placeholder="在这里输入你的提示词内容，可以包含具体的指令、上下文要求等"
+                              style="color:#222;">{{ form.content.value|default_if_none:'' }}</textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="id_description" class="form-label fw-bold"><i
+                            class="bi bi-info-circle me-2"></i>描述</label>
+                    <textarea name="description" id="id_description" class="form-control" rows="5"
+                              placeholder="简要描述这个提示词的用途和使用场景"
+                              style="color:#222;">{{ form.description.value|default_if_none:'' }}</textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="id_tags" class="form-label fw-bold d-block"><i class="bi bi-tags me-2"></i>标签</label>
+                    <div>
+                        {{ form.tags }}
+                        <div class="form-text text-muted">可多选</div>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="id_menu" class="form-label fw-bold d-block"><i class="bi bi-list-ul me-2"></i>分类 <span
+                            class="required-star" style="color:#dc3545;">*</span></label>
+                    <div>
+                        {{ form.menu }}
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label for="id_version" class="form-label fw-bold"><i class="bi bi-123 me-2"></i>版本</label>
+                    <input type="text" name="version" id="id_version" class="form-control"
+                           value="{{ form.version.value|default_if_none:'' }}" placeholder="1.0.0" style="color:#222;">
+                    <div class="form-text text-muted">建议使用语义化版本号，例如: 1.0.0</div>
+                </div>
+                <div class="d-flex gap-2 justify-content-start mt-4">
+                    <button type="submit" class="btn btn-primary px-4 py-2">保存</button>
+                    <a href="{% url 'prompt_list' %}" class="btn btn-light text-dark px-4 py-2">返回</a>
+                </div>
+            </form>
+        </div>
+        <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+        <script>
+            $(function () {
+                $('#id_tags').select2({
+                    width: '100%',
+                    placeholder: '请选择标签',
+                    allowClear: true,
+                    closeOnSelect: false
+                });
+                $('#id_menu').select2({
+                    width: '100%',
+                    placeholder: '请选择分类',
+                    minimumResultsForSearch: 8
+                });
+            });
+        </script>
+    {% elif mode == 'detail' %}
+        <div class="container py-5 d-flex justify-content-center" style="min-height:1100px;">
+            <div class="card shadow-lg p-4 w-100"
+                 style="max-width:1400px; min-height:1000px; border-radius:28px; background:#fff;">
+                <div class="mb-4">
+                    <a href="{% url 'prompt_list' %}" class="btn btn-outline-secondary" style="min-width:120px;"><i
+                            class="bi bi-arrow-left"></i> 返回列表</a>
+                </div>
+                <div class="row g-4 align-items-stretch" style="min-height:900px;">
+                    <!-- 左侧：提示词详情卡片 -->
+                    <div class="col-12 col-lg-6 d-flex align-items-stretch">
+                        <div class="card shadow-sm p-4 flex-fill w-100 position-relative"
+                             style="background:#fff;color:#222;border-radius:18px;min-height:900px;">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div>
+                                    <h2 class="fw-bold mb-1"
+                                        style="color:#ff9800;font-size:2.2rem;">{{ prompt.title }}</h2>
+                                    <div class="d-flex align-items-center flex-wrap text-muted"
+                                         style="font-size:0.98rem;gap:1.2rem;">
+                                        <span><i class="bi bi-calendar-event"></i> {{ prompt.updated_at|date:'n/j/Y' }}</span>
+                                        <span><i class="bi bi-person"></i> {{ prompt.owner.username }}</span>
+                                        <span><i class="bi bi-123"></i> v{{ prompt.version }}</span>
+                                        {% for tag in prompt.tags.all %}
+                                            <span class="badge bg-light text-dark border"
+                                                  style="color:#ff9800;border-radius:8px;font-weight:500;margin-right:0.3em;">{{ tag.name }}</span>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                <div class="btn-group" role="group">
+                                    <button type="button" class="btn btn-outline-primary" id="editPromptBtn"
+                                            title="编辑"><i class="bi bi-pencil"></i></button>
+                                    <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal"
+                                            data-bs-target="#deletePromptModal" data-bs-prompt-id="{{ prompt.id }}"
+                                            title="删除"><i class="bi bi-trash"></i></button>
+                                    <button type="button" class="btn btn-outline-secondary"
+                                            onclick="copyToClipboard('{{ prompt.content|escapejs }}')" title="复制内容">
+                                        <i class="bi bi-clipboard"></i></button>
+                                </div>
+                            </div>
+                            <hr style="margin:1.2rem 0;">
+                            <div class="mb-4">
+                                <h5 class="mb-2" style="color:#ff9800;"><i class="bi bi-card-text"></i> 提示词内容</h5>
+                                <div id="promptContentContainer">
+                                    <div id="promptContentDisplay"
+                                         style="white-space:pre-line;font-size:1.1rem;line-height:1.7;">{{ prompt.content }}</div>
+                                    <textarea id="promptContentEdit" class="form-control" rows="15"
+                                              style="display:none; font-size:1.1rem; line-height:1.7; background-color: #f8f8f8; border-radius: 8px; border: 1px solid #eee; color: #222;"></textarea>
+                                </div>
+                                <div class="d-flex justify-content-end mt-2" id="editControls" style="display:none;">
+                                    <button type="button" class="btn btn-primary btn-sm me-2" id="savePromptBtn"><i
+                                            class="bi bi-save"></i> 保存
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm" id="cancelEditBtn"><i
+                                            class="bi bi-x-lg"></i> 取消
+                                    </button>
+                                </div>
+                            </div>
+                            {% if prompt.description %}
+                                <div class="mb-4">
+                                    <h6 style="color:#ff9800;"><i class="bi bi-info-circle"></i> 描述</h6>
+                                    <div style="font-size:1rem;">{{ prompt.description }}</div>
+                                </div>
+                            {% endif %}
+                            <!-- 右下角最后更新 -->
+                            <div style="position:absolute;right:2rem;bottom:2rem;">
+                                <span class="text-muted"
+                                      style="font-size:0.95rem;">最后更新：{{ prompt.updated_at|date:'Y-m-d H:i' }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 右侧：对话区 -->
+                    <div class="col-12 col-lg-6 d-flex align-items-stretch">
+                        <div class="card shadow-sm p-4 flex-fill w-100 d-flex flex-column"
+                             style="background:#fafbfc;border-radius:18px;min-height:900px;">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div class="fw-bold" style="font-size:1.3rem;"><i class="bi bi-chat-dots"></i> 对话测试区
+                                </div>
+                                <div>
+                                    <span class="badge bg-light text-dark me-2">{{ prompt.title }}</span>
+                                    <button type="button" class="btn btn-outline-danger btn-sm" id="clearChatBtn"
+                                            title="清空对话"><i class="bi bi-trash3"></i> 清空
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <form class="row g-2 align-items-center">
+                                    <div class="col-12 mb-2">
+                                        <label for="chatModel" class="form-label mb-0 fw-bold">选择模型</label>
+                                        <select id="chatModel" class="form-select form-select-sm">
+                                            <!-- Options will be loaded dynamically -->
+                                        </select>
+                                    </div>
+                                    <div class="col-auto">
+                                        <label for="chatTemperature" class="form-label mb-0 fw-bold">Temperature</label>
+                                    </div>
+                                    <div class="col-auto">
+                                        <input type="number" step="0.01" min="0" max="2" id="chatTemperature"
+                                               class="form-control form-control-sm" value="0.7" style="width:70px;">
+                                    </div>
+                                    <div class="col-auto">
+                                        <label for="chatMaxTokens" class="form-label mb-0 fw-bold">Max Tokens</label>
+                                    </div>
+                                    <div class="col-auto">
+                                        <input type="number" min="1" max="4096" id="chatMaxTokens"
+                                               class="form-control form-control-sm" value="2000" style="width:80px;">
+                                    </div>
+                                    <div class="col-auto">
+                                        <label for="chatTopP" class="form-label mb-0 fw-bold">Top P</label>
+                                    </div>
+                                    <div class="col-auto">
+                                        <input type="number" step="0.01" min="0" max="1" id="chatTopP"
+                                               class="form-control form-control-sm" value="0.7" style="width:70px;">
+                                    </div>
+                                </form>
+                            </div>
+                            <hr class="my-3">
+                            <!-- 聊天消息区最大化 -->
+                            <div id="chatMessages" class="flex-grow-1"
+                                 style="min-height:0;height:auto;overflow-y:auto;background:#f8f8f8;border-radius:12px;padding:15px;margin-bottom:1.2rem;box-shadow:inset 0 0 5px rgba(0,0,0,0.05);">
+                                <div id="initialChatMessage" class="initial-message">
+                                    开始一段对话吧，左侧提示词内容将作为系统提示词参与对话。
+                                </div>
+                            </div>
+                            <!-- 输入区固定底部 -->
+                            <form id="chatInputForm" class="d-flex align-items-center gap-2 mt-auto">
+                                <input type="text" id="chatInput" class="form-control" placeholder="输入消息..."
+                                       autocomplete="off">
+                                <button type="submit" class="btn btn-primary"><i class="bi bi-send"></i></button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+
     </div>
-  </div>
-</div>
-{% endif %}
+    <div id="copySuccess" class="copy-success" style="z-index: 99999;">
+        <i class="bi bi-check-circle me-2"></i>已复制到剪贴板
+    </div>
+
+    <!-- Prompt Save Success Toast -->
+    <div id="promptSaveSuccessToast" class="toast-notification">
+        <i class="bi bi-check-circle me-2"></i>提示词已成功更新！
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deletePromptModal" tabindex="-1" aria-labelledby="deletePromptModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius:12px;box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
+                <div class="modal-header" style="border-bottom:none;padding-bottom:0;">
+                    <h5 class="modal-title fw-bold" id="deletePromptModalLabel" style="color:#dc3545;font-size:1.5rem;">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>确认删除</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" style="color:#555;">
+                    你确定要删除这个提示词吗？此操作无法撤销。
+                </div>
+                <div class="modal-footer" style="border-top:none;justify-content:flex-end;">
+                    <button type="button" class="btn btn-light text-dark px-4 py-2" data-bs-dismiss="modal">取消
+                    </button>
+                    <form id="deletePromptForm" method="post" action="">
+                        {% csrf_token %}
+                        <input type="hidden" name="confirm" value="1">
+                        <button type="submit" class="btn btn-danger px-4 py-2"
+                                style="background-color:#dc3545;border-color:#dc3545;">删除
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script>
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        function copyToClipboard(text) {
+            // 优先使用 Clipboard API
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(text).then(() => {
+                    showCopyToast();
+                }).catch(err => {
+                    fallbackCopyTextToClipboard(text);
+                });
+            } else {
+                fallbackCopyTextToClipboard(text);
+            }
+        }
+
+        function fallbackCopyTextToClipboard(text) {
+            // 创建临时 textarea
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            // 避免页面滚动
+            textArea.style.position = "fixed";
+            textArea.style.top = "0";
+            textArea.style.left = "0";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                showCopyToast();
+            } catch (err) {
+                alert('复制失败，请手动复制');
+            }
+            document.body.removeChild(textArea);
+        }
+
+        function showCopyToast() {
+            const copySuccess = document.getElementById('copySuccess');
+            if (copySuccess) {
+                copySuccess.classList.add('show');
+                setTimeout(() => {
+                    copySuccess.classList.remove('show');
+                }, 2000);
+            }
+        }
+
+        // Delete Prompt Modal logic
+        var deletePromptModal = document.getElementById('deletePromptModal');
+        if (deletePromptModal) {
+            deletePromptModal.addEventListener('show.bs.modal', function (event) {
+                var button = event.relatedTarget;
+                var promptId = button.getAttribute('data-bs-prompt-id');
+                var form = deletePromptModal.querySelector('#deletePromptForm');
+                form.action = '/prompts/' + promptId + '/delete/';
+            });
+        }
+
+        // In-place editing logic
+        const toggleEditBtn = document.getElementById('editPromptBtn');
+        const promptContentDisplay = document.getElementById('promptContentDisplay');
+        const promptContentEdit = document.getElementById('promptContentEdit');
+        const editControls = document.getElementById('editControls');
+        const savePromptBtn = document.getElementById('savePromptBtn');
+        const cancelEditBtn = document.getElementById('cancelEditBtn');
+        const promptSaveSuccessToast = document.getElementById('promptSaveSuccessToast');
+
+        // Initialize originalContent defensively
+        let originalContent = promptContentDisplay ? promptContentDisplay.innerText : '';
+
+        // Ensure all elements exist before adding event listeners to prevent errors
+        if (toggleEditBtn && promptContentDisplay && promptContentEdit && editControls && savePromptBtn && cancelEditBtn) {
+            // Initially hide edit controls
+            editControls.style.display = 'none'; // Ensure it's hidden on load
+
+            toggleEditBtn.addEventListener('click', function () {
+                console.log('Edit button clicked.');
+                if (promptContentEdit.style.display === 'none') {
+                    originalContent = promptContentDisplay.innerText;
+                    promptContentDisplay.style.display = 'none';
+                    promptContentEdit.value = originalContent;
+                    promptContentEdit.style.display = 'block';
+                    editControls.style.display = 'flex'; // Show save/cancel buttons
+                    console.log('Edit mode: editControls display is', editControls.style.display);
+                    // 编辑图标始终可见，不在这里隐藏它
+                }
+            });
+
+            cancelEditBtn.addEventListener('click', function () {
+                console.log('Cancel button clicked.');
+                promptContentEdit.style.display = 'none';
+                promptContentDisplay.innerText = originalContent; // Restore original content
+                promptContentDisplay.style.display = 'block';
+                editControls.style.display = 'none'; // Hide save/cancel buttons
+                console.log('Cancel mode: editControls display is', editControls.style.display);
+                // 编辑图标始终可见，不在这里显示它
+            });
+
+            savePromptBtn.addEventListener('click', function () {
+                console.log('Save button clicked.');
+                const newContent = promptContentEdit.value;
+                const promptId = {{ prompt.id }};
+                const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]') ? document.querySelector('[name=csrfmiddlewaretoken]').value : '';
+
+                fetch(`/api/prompt/${promptId}/update/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken
+                    },
+                    body: JSON.stringify({content: newContent})
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            return response.json().then(errorData => Promise.reject(errorData.error || response.statusText));
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            if (promptSaveSuccessToast) {
+                                promptSaveSuccessToast.classList.add('show');
+                                setTimeout(() => {
+                                    promptSaveSuccessToast.classList.remove('show');
+                                }, 3000);
+                            }
+                            if (promptContentDisplay) promptContentDisplay.innerText = data.content;
+                            originalContent = data.content;
+                        } else {
+                            alert('更新失败：' + (data.error || data.message));
+                        }
+                        // Revert to display mode (hide save/cancel, KEEP edit button visible)
+                        if (promptContentEdit) promptContentEdit.style.display = 'none';
+                        if (promptContentDisplay) promptContentDisplay.style.display = 'block';
+                        if (editControls) editControls.style.display = 'none'; // Hide save/cancel buttons
+                        console.log('Save mode: editControls display is', editControls.style.display);
+                        // 编辑图标始终可见，不在这里影响它
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('网络请求或更新失败：' + error);
+                        // On network error, revert to display mode (hide save/cancel, KEEP edit button visible)
+                        if (promptContentEdit) promptContentEdit.style.display = 'none';
+                        if (promptContentDisplay) promptContentDisplay.innerText = originalContent;
+                        if (promptContentDisplay) promptContentDisplay.style.display = 'block';
+                        if (editControls) editControls.style.display = 'none'; // Hide save/cancel buttons
+                        console.log('Error mode: editControls display is', editControls.style.display);
+                        // 编辑图标始终可见，不在这里影响它
+                    });
+            });
+        }
+
+        // Ollama Chat Logic
+        document.addEventListener('DOMContentLoaded', function () {
+            // 动态加载 Ollama 模型列表
+            var chatModelSelect = document.getElementById('chatModel');
+            if (chatModelSelect) {
+                fetch('/api/ollama_models/')
+                    .then(function (response) {
+                        return response.json();
+                    })
+                    .then(function (data) {
+                        chatModelSelect.innerHTML = '';
+                        if (data.success && Array.isArray(data.models)) {
+                            data.models.forEach(function (model) {
+                                var opt = document.createElement('option');
+                                opt.value = model;
+                                opt.textContent = model;
+                                chatModelSelect.appendChild(opt);
+                            });
+                            // 添加自定义选项
+                            var customOpt = document.createElement('option');
+                            customOpt.value = '';
+                            customOpt.textContent = '自定义...';
+                            chatModelSelect.appendChild(customOpt);
+                        } else {
+                            chatModelSelect.innerHTML = '<option>llama2</option><option>qwen3:8b</option><option>glm-4</option><option>phi3</option><option>自定义...</option>';
+                        }
+                    })
+                    .catch(function () {
+                        chatModelSelect.innerHTML = '<option>llama2</option><option>qwen3:8b</option><option>glm-4</option><option>phi3</option><option>自定义...</option>';
+                    });
+            }
+
+            var chatInputForm = document.getElementById('chatInputForm');
+            var chatInput = document.getElementById('chatInput');
+            var chatMessages = document.getElementById('chatMessages');
+            var chatTemperatureInput = document.getElementById('chatTemperature');
+            var chatMaxTokensInput = document.getElementById('chatMaxTokens');
+            var chatTopPInput = document.getElementById('chatTopP');
+            var initialChatMessage = document.getElementById('initialChatMessage'); // 获取初始提示消息元素
+
+            if (chatInputForm && chatInput && chatMessages && chatModelSelect && chatTemperatureInput && chatMaxTokensInput && chatTopPInput) {
+                chatInputForm.addEventListener('submit', async function (event) {
+                    event.preventDefault(); // Prevent default form submission
+                    var userInput = chatInput.value.trim();
+                    if (!userInput) return;
+
+                    // 如果初始提示消息存在，则隐藏它
+                    if (initialChatMessage) {
+                        initialChatMessage.style.display = 'none';
+                    }
+
+                    // Get selected model and parameters
+                    var model = chatModelSelect.value;
+                    var temperature = parseFloat(chatTemperatureInput.value);
+                    var maxTokens = parseInt(chatMaxTokensInput.value);
+                    var topP = parseFloat(chatTopPInput.value);
+
+                    // Display user message
+                    var userMessageDiv = document.createElement('div');
+                    userMessageDiv.className = 'message user-message';
+                    userMessageDiv.innerHTML = `<div class="message-content">${userInput}</div>`;
+                    chatMessages.appendChild(userMessageDiv);
+
+                    // Add loading spinner
+                    var loadingDiv = document.createElement('div');
+                    loadingDiv.className = 'message ai-message';
+                    loadingDiv.innerHTML = `
+            <div class="message-content">
+                <div class="message-text">
+                    <div class="spinner-border spinner-border-sm text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+        `;
+                    chatMessages.appendChild(loadingDiv);
+                    chatMessages.scrollTop = chatMessages.scrollHeight; // Scroll to bottom
+
+                    chatInput.value = ''; // Clear input
+
+                    // Fetch prompt content from the hidden div (or directly from Django context if preferred)
+                    var promptContent = promptContentDisplay.innerText;
+
+                    try {
+                        var response = await fetch('/api/ollama_chat/', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': getCookie('csrftoken')
+                            },
+                            body: JSON.stringify({
+                                model: model,
+                                prompt_content: promptContent,
+                                user_input: userInput,
+                                temperature: temperature,
+                                max_tokens: maxTokens,
+                                top_p: topP
+                            })
+                        });
+
+                        var data = await response.json();
+
+                        // Remove loading spinner
+                        chatMessages.removeChild(loadingDiv);
+
+                        var aiMessageDiv = document.createElement('div');
+                        aiMessageDiv.className = 'message ai-message';
+                        if (data.success) {
+                            aiMessageDiv.innerHTML = `<div class="message-content">${data.response}</div>`;
+                        } else {
+                            aiMessageDiv.innerHTML = `<div class="message-content"><div class="message-text text-danger">Error: ${data.error}</div></div>`;
+                        }
+                        chatMessages.appendChild(aiMessageDiv);
+                        chatMessages.scrollTop = chatMessages.scrollHeight; // Scroll to bottom
+
+                    } catch (error) {
+                        Add
+                        commentMore
+                        actions
+                        console.error('Fetch error:', error);
+                        // Remove loading spinner
+                        chatMessages.removeChild(loadingDiv);
+
+                        var errorDiv = document.createElement('div');
+                        errorDiv.className = 'message ai-message';
+                        errorDiv.innerHTML = `<div class="message-content"><div class="message-text text-danger">Fetch Error: ${error.message || error}</div></div>`;
+                        chatMessages.appendChild(errorDiv);
+                        chatMessages.scrollTop = chatMessages.scrollHeight; // Scroll to bottom
+                    }
+                });
+            }
+
+            // 清空聊天按钮逻辑
+            var clearBtn = document.getElementById('clearChatBtn');
+            if (clearBtn) {
+                clearBtn.onclick = function () {
+                    var chatMsg = document.getElementById('chatMessages');
+                    if (chatMsg) {
+                        chatMsg.innerHTML = ''; // 清空所有消息
+                        if (initialChatMessage) {
+                            initialChatMessage.style.display = 'flex'; // 重新显示初始提示消息
+                        }
+                    }
+                };
+            }
+        });
+    </script>
 {% endblock %} 

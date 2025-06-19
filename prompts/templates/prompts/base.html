@@ -126,6 +126,35 @@
       });
     }
   });
+
+  // 获取 CSRF Token 的函数
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+  const csrftoken = getCookie('csrftoken');
+  // Patch fetch，自动加 CSRF Token
+  const _fetch = window.fetch;
+  window.fetch = function(input, init) {
+    if (typeof input === 'string' && (/^\/api\//.test(input) || /^\/(save|optimize)/.test(input))) {
+      init = init || {};
+      init.headers = init.headers || {};
+      if (['POST', 'PUT', 'DELETE'].includes((init.method || 'GET').toUpperCase())) {
+        init.headers['X-CSRFToken'] = csrftoken;
+      }
+    }
+    return _fetch(input, init);
+  };
 </script>
 </body>
 </html> 

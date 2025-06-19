@@ -70,11 +70,12 @@ def home(request):
 
 class PromptForm(ModelForm):
     tags = ModelMultipleChoiceField(queryset=Tag.objects.all(), required=False, widget=SelectMultiple)
+    menu = forms.ModelChoiceField(queryset=Menu.objects.all(), required=True, label='分类')
     class Meta:
         model = Prompt
-        fields = ['title', 'content', 'description', 'tags', 'version']
+        fields = ['title', 'content', 'description', 'tags', 'version', 'menu']
 
-    def clean_title(self):
+def clean_title(self):
         title = self.cleaned_data['title']
         qs = Prompt.objects.filter(title=title)
         if self.instance.pk:
@@ -96,9 +97,11 @@ def manage_prompts(request, mode='list', pk=None):
         return render(request, 'prompts/prompt_list.html', {'prompts': prompts, 'tags': tags, 'mode': mode, 'search_query': search_query})
 
     elif mode == 'create':
+        menus = Menu.objects.all().order_by('parent_id', 'id')
         if request.method == 'POST':
             form = PromptForm(request.POST)
             form.fields['tags'].queryset = tags
+            form.fields['menu'].queryset = menus
             if form.is_valid():
                 prompt = form.save(commit=False)
                 prompt.owner = request.user
@@ -111,13 +114,16 @@ def manage_prompts(request, mode='list', pk=None):
         else:
             form = PromptForm()
             form.fields['tags'].queryset = tags
+            form.fields['menu'].queryset = menus
         return render(request, 'prompts/prompt_list.html', {'form': form, 'tags': tags, 'mode': mode})
 
     elif mode == 'edit':
         prompt = get_object_or_404(Prompt, pk=pk, owner=request.user)
+        menus = Menu.objects.all().order_by('parent_id', 'id')
         if request.method == 'POST':
             form = PromptForm(request.POST, instance=prompt)
             form.fields['tags'].queryset = tags
+            form.fields['menu'].queryset = menus
             if form.is_valid():
                 form.save()
                 messages.success(request, '提示词已更新！')
@@ -125,6 +131,7 @@ def manage_prompts(request, mode='list', pk=None):
         else:
             form = PromptForm(instance=prompt)
             form.fields['tags'].queryset = tags
+            form.fields['menu'].queryset = menus
         return render(request, 'prompts/prompt_list.html', {'form': form, 'prompt': prompt, 'tags': tags, 'mode': mode})
 
     elif mode == 'detail':
