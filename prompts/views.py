@@ -374,6 +374,9 @@ def import_prompts_excel(request):
     finally:
         os.remove(tmp_path)
 
+@csrf_exempt
+@login_required
+@require_POST
 def save_prompt(request):
     try:
         data = json.loads(request.body)
@@ -406,3 +409,59 @@ def save_prompt(request):
         return JsonResponse({'success': True, 'id': prompt.id})
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+@csrf_exempt
+@login_required
+@require_POST
+def optimize_prompt(request):
+    try:
+        data = json.loads(request.body)
+        content = data.get('content', '').strip()
+        if not content:
+            return JsonResponse({'success': False, 'error': 'content为必填项'}, status=400)
+        # 读取系统提示词
+        optimize_path = os.path.join(os.path.dirname(__file__), 'optimize.md')
+        with open(optimize_path, 'r', encoding='utf-8') as f:
+            system_prompt = f.read()
+        # 构造llm输入
+        user_input = content
+        # 这里假设有llm_api(system_prompt, user_input)函数，返回优化结果
+        # 你可以替换为实际的llm调用代码
+        result = call_llm(system_prompt, user_input)
+        return JsonResponse({'success': True, 'template': result})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+def call_llm(system_prompt, user_input):
+    # TODO: 替换为实际的LLM调用逻辑
+    # 这里只是示例，返回拼接内容
+    inputs = f"[系统提示词]\n{system_prompt}\n[用户输入]\n{user_input}"
+    results = gemini_models(user_input=inputs)
+    return results
+
+def gemini_models(user_input):
+    print(user_input)
+    try:
+        url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=AIzaSyCFYiouMGo8GstBBGGDuLk2Y6KOX--d638"
+        headers = {"Content-Type": "application/json"}
+        payload = {
+            "contents": [
+                {
+                    "parts": [
+                        {"text": user_input}
+                    ]
+                }
+            ]
+        }
+        response = requests.post(url, headers=headers, json=payload, timeout=100)
+        response.raise_for_status()
+        data = response.json()
+        candidates = data.get('candidates', [])
+        if not candidates:
+            return ''
+        parts = candidates[0].get('content', {}).get('parts', [])
+        text = ''.join([part.get('text', '') for part in parts])
+        return text
+    except Exception as e:
+        print(e)
+        return ''
