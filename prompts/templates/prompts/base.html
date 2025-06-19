@@ -49,7 +49,7 @@
   <div class="d-flex align-items-center">
     {% if user.is_authenticated %}
       <a href="{% url 'prompt_create' %}" class="btn btn-primary rounded-3 me-3"><i class="bi bi-plus-circle"></i> 新建</a>
-      <button id="importExcelBtn" class="btn btn-outline-primary rounded-3 me-3" type="button"><i class="bi bi-upload"></i> 导入</button>
+      <button id="importExcelBtn" class="btn btn-primary rounded-3 me-3" type="button"><i class="bi bi-upload"></i> 导入</button>
       <input type="file" id="importExcelInput" accept=".xls,.xlsx" style="display:none;" />
       <div class="pm-user-dropdown" id="pmUserDropdown">
         <button class="pm-user-btn" id="pmUserBtn">{{ user.username }}</button>
