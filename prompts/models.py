@@ -15,6 +15,15 @@ class Tag(models.Model):
     def __str__(self):
         return self.name
 
+class Menu(models.Model):
+    name = models.CharField(max_length=100)
+    parent = models.ForeignKey('self', null=True, blank=True, related_name='children', on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.name
+
 class Prompt(models.Model):
     title = models.CharField(max_length=200, unique=True)
     content = models.TextField()
@@ -22,6 +31,7 @@ class Prompt(models.Model):
     tags = models.ManyToManyField(Tag, blank=True)
     version = models.CharField(max_length=20, default="1.0.0")
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
+    menu = models.ForeignKey(Menu, on_delete=models.PROTECT, related_name='prompts')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

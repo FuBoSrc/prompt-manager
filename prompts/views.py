@@ -1,14 +1,14 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login
 from django.contrib import messages
-from .models import User, Prompt, Tag
+from .models import User, Prompt, Tag, Menu
 from django import forms
 from django.contrib.auth.decorators import login_required
 from django.forms import ModelForm, ModelMultipleChoiceField
 from django.forms.widgets import SelectMultiple
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_http_methods, require_GET
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseNotAllowed
 import json
 import requests # 引入 requests 库
 from langchain_community.llms import Ollama
@@ -236,6 +236,59 @@ def ollama_chat(request):
 @login_required
 def prompt_manage(request):
     return render(request, 'prompts/prompt_manage.html')
+
+# 菜单树递归序列化
+
+def serialize_menu(menu):
+    return {
+        'id': menu.id,
+        'name': menu.name,
+        'parent': menu.parent_id,
+        'children': [serialize_menu(child) for child in menu.children.all().order_by('id')],
+        'created_at': menu.created_at,
+        'updated_at': menu.updated_at,
+    }
+
+@csrf_exempt
+def menu_api(request, menu_id=None):
+    if request.method == 'GET':
+        # 查询菜单树
+        roots = Menu.objects.filter(parent=None).order_by('id')
+        data = [serialize_menu(menu) for menu in roots]
+        return JsonResponse({'success': True, 'menus': data})
+    elif request.method == 'POST':
+        # 新增菜单
+        try:
+            data = json.loads(request.body)
+            name = data.get('name')
+            parent_id = data.get('parent')
+            parent = Menu.objects.get(id=parent_id) if parent_id else None
+            menu = Menu.objects.create(name=name, parent=parent)
+            return JsonResponse({'success': True, 'menu': serialize_menu(menu)})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+    elif request.method == 'PUT' and menu_id:
+        # 修改菜单
+        try:
+            data = json.loads(request.body)
+            menu = Menu.objects.get(id=menu_id)
+            menu.name = data.get('name', menu.name)
+            parent_id = data.get('parent')
+            menu.parent = Menu.objects.get(id=parent_id) if parent_id else None
+            menu.save()
+            return JsonResponse({'success': True, 'menu': serialize_menu(menu)})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+    elif request.method == 'DELETE' and menu_id:
+        # 删除菜单
+        try:
+            menu = Menu.objects.get(id=menu_id)
+            menu.delete()
+            return JsonResponse({'success': True})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+    else:
+        return HttpResponseNotAllowed(['GET', 'POST', 'PUT', 'DELETE'])
 
 @require_GET
 def ollama_models(request):

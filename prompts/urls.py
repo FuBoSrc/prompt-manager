@@ -1,6 +1,7 @@
 from django.urls import path
 from . import views
 from django.contrib.auth import views as auth_views
+from .views import menu_api
 
 urlpatterns = [
     path('', views.home, name='home'),
@@ -18,4 +19,6 @@ urlpatterns = [
     path('api/ollama_models/', views.ollama_models, name='ollama_models'),
     path('tags/', views.tag_manage, name='tag_manage'),
     path('prompt_manage/', views.prompt_manage, name='prompt_manage'),
+    path('api/menus/', menu_api, name='menu_api'),
+    path('api/menus/<int:menu_id>/', menu_api, name='menu_api_detail'),
 ] 
