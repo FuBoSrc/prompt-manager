@@ -115,7 +115,7 @@ def manage_prompts(request, mode='list', pk=None):
             form = PromptForm()
             form.fields['tags'].queryset = tags
             form.fields['menu'].queryset = menus
-        return render(request, 'prompts/prompt_list.html', {'form': form, 'tags': tags, 'mode': mode})
+        return render(request, 'prompts/prompt_list.html', {'form': form, 'tags': tags, 'menus': menus, 'mode': mode})
 
     elif mode == 'edit':
         prompt = get_object_or_404(Prompt, pk=pk, owner=request.user)
@@ -132,7 +132,7 @@ def manage_prompts(request, mode='list', pk=None):
             form = PromptForm(instance=prompt)
             form.fields['tags'].queryset = tags
             form.fields['menu'].queryset = menus
-        return render(request, 'prompts/prompt_list.html', {'form': form, 'prompt': prompt, 'tags': tags, 'mode': mode})
+        return render(request, 'prompts/prompt_list.html', {'form': form, 'prompt': prompt, 'tags': tags, 'menus': menus, 'mode': mode})
 
     elif mode == 'detail':
         prompt = get_object_or_404(Prompt, pk=pk, owner=request.user)

@@ -291,51 +291,53 @@
 
         /* Select2 Custom Styling */
         .select2-container--default .select2-selection--multiple {
-            background-color: #fff; /* White background for input (Image 2) */
-            border-radius: 8px; /* Consistent rounded corners */
-            border: 1px solid #eee; /* Subtle border */
-            min-height: 44px; /* Consistent height */
-            padding: 6px 12px; /* Padding inside the input */
-            align-items: center; /* Vertically align tags and search input */
-            overflow-x: auto; /* Allow horizontal scrolling for tags */
-            white-space: nowrap; /* Prevent tags from wrapping */
-            display: flex; /* Use flexbox for layout of tags and search input */
-            width: 100%; /* Ensure it takes full width of its parent */
+            background-color: #f8f8f8; /* Match form background */
+            border-radius: 8px;
+            border: 1px solid #eee;
+            min-height: 44px;
+            padding: 6px 12px;
+            align-items: center;
+            overflow-x: visible; /* Remove horizontal scroll */
+            white-space: normal; /* Allow wrapping */
+            display: flex;
+            flex-wrap: wrap; /* Allow tags to wrap */
+            width: 100%;
         }
 
         .select2-container--default.select2-container--focus .select2-selection--multiple {
-            border-color: #ff9800; /* Highlight border on focus */
-            box-shadow: 0 0 0 0.25rem rgba(255, 152, 0, 0.25); /* Focus shadow */
+            border-color: #ff9800;
+            box-shadow: 0 0 0 0.25rem rgba(255, 152, 0, 0.25);
         }
 
         .select2-container--default .select2-selection--multiple .select2-selection__choice {
-            background-color: #f0f0f0; /* Light grey for selected tags (Image 2) */
-            border: none; /* No border for flat look (Image 2) */
-            border-radius: 14px; /* Perfect pill shape for 28px height */
-            padding: 3px 8px; /* Adjusted padding for compactness (Image 2) */
-            color: #333; /* Darker text (Image 2) */
-            font-size: 0.9em; /* Consistent font size */
-            display: inline-flex; /* Use inline-flex for better horizontal alignment */
+            background-color: #fff7e6; /* Light orange background for selected tags */
+            border: 1.5px solid #ff9800; /* Orange border */
+            border-radius: 14px;
+            padding: 3px 10px;
+            color: #ff9800; /* Orange text */
+            font-size: 0.95em;
+            display: inline-flex;
             align-items: center;
-            gap: 4px; /* Smaller gap between text and 'x' */
-            margin-right: 6px; /* Spacing between tags */
-            height: 28px; /* Fixed height for consistent look */
-            vertical-align: middle; /* Align tags vertically with input */
-            flex-shrink: 0; /* Prevent tags from shrinking */
+            gap: 4px;
+            margin-right: 6px;
+            margin-bottom: 4px; /* Add bottom margin for wrapping */
+            height: 28px;
+            vertical-align: middle;
+            flex-shrink: 0;
+            font-weight: 500;
         }
 
         .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
-            color: #999; /* Grey 'x' color (Image 2) */
-            font-weight: normal; /* Normal weight for 'x' (Image 2) */
-            margin-left: 4px; /* Adjusted margin */
+            color: #ff9800; /* Orange 'x' */
+            font-weight: bold;
+            margin-left: 6px;
             cursor: pointer;
-            font-size: 0.8em; /* Smaller 'x' */
+            font-size: 1em;
+            transition: color 0.2s;
         }
-
         .select2-container--default .select2-selection--multiple .select2-selection__choice__remove:hover {
-            color: #555;
+            color: #e68900; /* Darker orange on hover */
         }
-
         .select2-container--default .select2-selection--multiple .select2-selection__arrow {
             height: 100%; /* Make arrow fill container height */
             width: 20px; /* Adjust width of arrow area */
@@ -347,7 +349,6 @@
             justify-content: center;
             pointer-events: none; /* Allow clicks to pass through to the main input */
         }
-
         .select2-container--default .select2-selection--multiple .select2-selection__arrow b {
             border-color: #999 transparent transparent transparent; /* Grey arrow */
             border-style: solid;
@@ -360,7 +361,6 @@
             top: 50%;
             width: 0;
         }
-
 
         /* Dropdown results styling (Image 1) */
         .select2-results__option {
