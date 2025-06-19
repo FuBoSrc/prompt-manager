@@ -480,7 +480,7 @@ def call_llm(system_prompt, user_input):
 def gemini_models(user_input):
     print(user_input)
     try:
-        url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=AIzaSyCFYiouMGo8GstBBGGDuLk2Y6KOX--d638"
+        url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key="
         headers = {"Content-Type": "application/json"}
         payload = {
             "contents": [
