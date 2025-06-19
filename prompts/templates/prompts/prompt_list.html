@@ -293,33 +293,6 @@
     color: #555;
   }
 
-  .select2-container--default .select2-selection--multiple .select2-search--inline .select2-search__field {
-    background-color: transparent; /* Make sure search field background is transparent */
-    color: #222; /* Text color for search input */
-    margin-top: 0; /* Adjust margin */
-    line-height: 1.5; /* Align with other text */
-    padding: 0; /* Remove default padding */
-    height: auto; /* Allow height to adjust */
-    width: auto !important; /* Allow width to adapt to content */
-    min-width: 100px; /* Minimum width for search field */
-    flex-grow: 1; /* Allow search field to grow */
-  }
-
-  .select2-container--default .select2-selection--multiple .select2-selection__clear {
-    color: #999; /* Grey clear 'x' (Image 2) */
-    font-size: 1.2em;
-    cursor: pointer;
-    margin-left: auto; /* Push to the right */
-    margin-right: 8px; /* Spacing from dropdown arrow */
-    position: relative;
-    top: -2px; /* Fine-tune vertical alignment */
-    flex-shrink: 0; /* Prevent clear button from shrinking */
-  }
-
-  .select2-container--default .select2-selection--multiple .select2-selection__clear:hover {
-    color: #555;
-  }
-
   .select2-container--default .select2-selection--multiple .select2-selection__arrow {
     height: 100%; /* Make arrow fill container height */
     width: 20px; /* Adjust width of arrow area */
@@ -374,60 +347,170 @@
       line-height: 44px; /* Vertically center text */
   }
 
+  .pm-main-flex {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 0;
+    min-height: 80vh;
+  }
+  #menuSidebar {
+    width: 240px;
+    min-width: 200px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px #0001;
+    padding: 1.2rem 0.7rem;
+    min-height: 600px;
+    margin-right: 2.2rem;
+    margin-top: 0.5rem;
+  }
+  @media (max-width: 900px) {
+    .pm-main-flex { flex-direction: column; }
+    #menuSidebar { width: 100%; min-width: 0; margin-right: 0; margin-bottom: 1.2rem; }
+  }
 </style>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-<!-- 引入 jQuery -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-<div class="container py-4">
 {% if mode == 'list' %}
-<div class="d-flex justify-content-between align-items-center mt-4 mb-3">
-  <h3 class="fw-bold d-flex align-items-center">
-    <i class="bi bi-folder2-open" style="color:#ff9800;font-size:2rem;margin-right:0.5rem;"></i>
-    提示词库
-  </h3>
-  <span class="text-muted">共 {{ prompts.count }} 个提示词</span>
-</div>
-<div class="d-flex justify-content-between align-items-center mb-3">
-  <form class="d-flex flex-grow-1 me-3" action="{% url 'prompt_list' %}" method="get">
-    <div class="input-group">
-      <span class="input-group-text"><i class="bi bi-search"></i></span>
-      <input type="text" class="form-control" placeholder="搜索提示词..." name="q" value="{{ request.GET.q|default_if_none:'' }}">
+<div class="pm-main-flex">
+  <!-- 左侧菜单分类栏 -->
+  <div id="menuSidebar">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <span class="fw-bold" style="font-size: 1.15rem;"><i class="bi bi-list-ul me-2"></i>菜单分类</span>
+      <button class="btn btn-sm btn-outline-primary" id="addMenuBtn" title="新增分类" type="button"><i class="bi bi-plus"></i></button>
     </div>
-  </form>
-  <a href="{% url 'tag_manage' %}" class="btn btn-outline-secondary rounded-3"><i class="bi bi-tags"></i> 标签管理</a>
-</div>
-<div class="row g-4">
-  {% for prompt in prompts %}
-  <div class="col-12 col-md-6 col-lg-4">
-    <div class="card shadow-sm h-100 prompt-card" style="cursor:pointer;" onclick="window.location.href='{% url 'prompt_detail' pk=prompt.id %}'">
-      <div class="card-body">
-        <h5 class="card-title"><i class="bi bi-lightning-charge"></i> {{ prompt.title }}</h5>
-        <div class="prompt-content">{{ prompt.content|linebreaksbr }}</div>
-        <div class="prompt-tags">
-          {% for tag in prompt.tags.all %}
-            <span class="prompt-tag">{{ tag.name }}</span>
-          {% endfor %}
-        </div>
-        <div class="d-flex justify-content-between align-items-center mt-3">
-          <div>
-            <span class="badge bg-light text-dark">v{{ prompt.version }}</span>
-          </div>
-          <div class="action-buttons">
-            <button class="btn btn-sm btn-outline-primary me-1" onclick="event.stopPropagation(); copyToClipboard('{{ prompt.content|escapejs }}')" data-bs-toggle="tooltip" title="复制内容"><i class="bi bi-clipboard"></i></button>
-            <a href="{% url 'prompt_edit' pk=prompt.id %}" class="btn btn-sm btn-outline-secondary me-1" onclick="event.stopPropagation();" data-bs-toggle="tooltip" title="编辑"><i class="bi bi-pencil"></i></a>
-            <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deletePromptModal" data-bs-prompt-id="{{ prompt.id }}" onclick="event.stopPropagation();" title="删除"><i class="bi bi-trash"></i></button>
-          </div>
-        </div>
+    <ul class="list-unstyled" id="menuTree" style="margin-bottom: 1.2rem;"></ul>
+    <div id="menuEditArea" style="display:none;">
+      <input type="text" class="form-control form-control-sm mb-2" id="menuNameInput" placeholder="输入分类名称">
+      <div class="d-flex gap-2">
+        <button class="btn btn-sm btn-primary" id="saveMenuBtn" type="button">保存</button>
+        <button class="btn btn-sm btn-light" id="cancelMenuBtn" type="button">取消</button>
       </div>
     </div>
   </div>
-  {% empty %}
-  <div class="col-12 text-center text-muted">暂无提示词</div>
-  {% endfor %}
+  <!-- 右侧主内容区 -->
+  <div class="container py-4 flex-grow-1">
+    <div class="d-flex justify-content-between align-items-center mt-4 mb-3">
+      <h3 class="fw-bold d-flex align-items-center">
+        <i class="bi bi-folder2-open" style="color:#ff9800;font-size:2rem;margin-right:0.5rem;"></i>
+        提示词库
+      </h3>
+      <span class="text-muted">共 {{ prompts.count }} 个提示词</span>
+    </div>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <form class="d-flex flex-grow-1 me-3" action="{% url 'prompt_list' %}" method="get">
+        <div class="input-group">
+          <span class="input-group-text"><i class="bi bi-search"></i></span>
+          <input type="text" class="form-control" placeholder="搜索提示词..." name="q" value="{{ request.GET.q|default_if_none:'' }}">
+        </div>
+      </form>
+      <a href="{% url 'tag_manage' %}" class="btn btn-outline-secondary rounded-3"><i class="bi bi-tags"></i> 标签管理</a>
+    </div>
+    <div class="row g-4" id="promptCardList">
+      {% for prompt in prompts %}
+      <div class="col-12 col-md-6 col-lg-4">
+        <div class="card shadow-sm h-100 prompt-card" style="cursor:pointer;" onclick="window.location.href='{% url 'prompt_detail' pk=prompt.id %}'">
+          <div class="card-body">
+            <h5 class="card-title"><i class="bi bi-lightning-charge"></i> {{ prompt.title }}</h5>
+            <div class="prompt-content">{{ prompt.content|linebreaksbr }}</div>
+            <div class="prompt-tags">
+              {% for tag in prompt.tags.all %}
+                <span class="prompt-tag">{{ tag.name }}</span>
+              {% endfor %}
+            </div>
+            <div class="d-flex justify-content-between align-items-center mt-3">
+              <div>
+                <span class="badge bg-light text-dark">v{{ prompt.version }}</span>
+              </div>
+              <div class="action-buttons">
+                <button class="btn btn-sm btn-outline-primary me-1" onclick="event.stopPropagation(); copyToClipboard('{{ prompt.content|escapejs }}')" data-bs-toggle="tooltip" title="复制内容"><i class="bi bi-clipboard"></i></button>
+                <a href="{% url 'prompt_edit' pk=prompt.id %}" class="btn btn-sm btn-outline-secondary me-1" onclick="event.stopPropagation();" data-bs-toggle="tooltip" title="编辑"><i class="bi bi-pencil"></i></a>
+                <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deletePromptModal" data-bs-prompt-id="{{ prompt.id }}" onclick="event.stopPropagation();" title="删除"><i class="bi bi-trash"></i></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% empty %}
+      <div class="col-12 text-center text-muted">暂无提示词</div>
+      {% endfor %}
+    </div>
+  </div>
 </div>
-
+<script>
+function renderMenuTree(menus, parentUl, selectedId) {
+  parentUl.innerHTML = '';
+  menus.forEach(function(menu) {
+    var li = document.createElement('li');
+    li.className = 'd-flex align-items-center justify-content-between mb-1';
+    li.style.padding = '0.2rem 0.3rem';
+    li.style.borderRadius = '6px';
+    li.style.cursor = 'pointer';
+    if (menu.id === selectedId) li.style.background = '#fff7e6';
+    li.innerHTML = '<span class="menu-name" data-id="' + menu.id + '"><i class="bi bi-folder2-open me-1"></i>' + menu.name + '</span>' +
+      '<span>' +
+        '<button class="btn btn-sm btn-link text-primary p-0 me-1 edit-menu-btn" data-id="' + menu.id + '" title="编辑"><i class="bi bi-pencil"></i></button>' +
+        '<button class="btn btn-sm btn-link text-danger p-0 del-menu-btn" data-id="' + menu.id + '" title="删除"><i class="bi bi-trash"></i></button>' +
+      '</span>';
+    parentUl.appendChild(li);
+    if (menu.children && menu.children.length > 0) {
+      var childUl = document.createElement('ul');
+      childUl.className = 'list-unstyled ms-3';
+      li.appendChild(childUl);
+      renderMenuTree(menu.children, childUl, selectedId);
+    }
+    li.querySelector('.menu-name').onclick = function(e) {
+      e.stopPropagation();
+      document.querySelectorAll('#menuTree .menu-name').forEach(function(el) { el.parentElement.style.background = ''; });
+      li.style.background = '#fff7e6';
+    };
+    li.querySelector('.edit-menu-btn').onclick = function(e) {
+      e.stopPropagation();
+      showMenuEdit(menu);
+    };
+    li.querySelector('.del-menu-btn').onclick = function(e) {
+      e.stopPropagation();
+      if (confirm('确定删除该分类？')) {
+        fetch('/api/menus/' + menu.id + '/', {method: 'DELETE'}).then(function(r) { return r.json(); }).then(function(data) { if(data.success) loadMenus(); else alert(data.error); });
+      }
+    };
+  });
+}
+var editingMenu = null;
+function showMenuEdit(menu) {
+  editingMenu = menu;
+  document.getElementById('menuEditArea').style.display = 'block';
+  document.getElementById('menuNameInput').value = menu ? menu.name : '';
+}
+function hideMenuEdit() {
+  editingMenu = null;
+  document.getElementById('menuEditArea').style.display = 'none';
+  document.getElementById('menuNameInput').value = '';
+}
+function loadMenus() {
+  fetch('/api/menus/').then(function(r) { return r.json(); }).then(function(data) {
+    if(data.success) renderMenuTree(data.menus, document.getElementById('menuTree'));
+  });
+}
+document.addEventListener('DOMContentLoaded', function() {
+  document.getElementById('addMenuBtn').onclick = function() { showMenuEdit(null); };
+  document.getElementById('cancelMenuBtn').onclick = hideMenuEdit;
+  document.getElementById('saveMenuBtn').onclick = function() {
+    var name = document.getElementById('menuNameInput').value.trim();
+    if (!name) return alert('请输入分类名称');
+    if (editingMenu) {
+      fetch('/api/menus/' + editingMenu.id + '/', {method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({name: name})})
+        .then(function(r) { return r.json(); }).then(function(data) { if(data.success) { loadMenus(); hideMenuEdit(); } else alert(data.error); });
+    } else {
+      fetch('/api/menus/', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({name: name})})
+        .then(function(r) { return r.json(); }).then(function(data) { if(data.success) { loadMenus(); hideMenuEdit(); } else alert(data.error); });
+    }
+  };
+  loadMenus();
+});
+</script>
 {% elif mode == 'create' %}
 <div class="d-flex justify-content-between align-items-center mt-4 mb-3">
     <h3 class="fw-bold d-flex align-items-center">
@@ -466,7 +549,6 @@
     </div>
   </form>
 </div>
-
 {% elif mode == 'edit' %}
 <div class="d-flex justify-content-between align-items-center mt-4 mb-3">
     <h3 class="fw-bold d-flex align-items-center">
@@ -505,7 +587,6 @@
     </div>
   </form>
 </div>
-
 {% elif mode == 'detail' %}
 <div class="container py-5 d-flex justify-content-center" style="min-height:1100px;">
   <div class="card shadow-lg p-4 w-100" style="max-width:1400px; min-height:1000px; border-radius:28px; background:#fff;">
@@ -612,345 +693,4 @@
   </div>
 </div>
 {% endif %}
-
-</div>
-<div id="copySuccess" class="copy-success" style="z-index: 99999;">
-  <i class="bi bi-check-circle me-2"></i>已复制到剪贴板
-</div>
-
-<!-- Prompt Save Success Toast -->
-<div id="promptSaveSuccessToast" class="toast-notification">
-  <i class="bi bi-check-circle me-2"></i>提示词已成功更新！
-</div>
-
-<!-- Delete Confirmation Modal -->
-<div class="modal fade" id="deletePromptModal" tabindex="-1" aria-labelledby="deletePromptModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content" style="border-radius:12px;box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
-      <div class="modal-header" style="border-bottom:none;padding-bottom:0;">
-        <h5 class="modal-title fw-bold" id="deletePromptModalLabel" style="color:#dc3545;font-size:1.5rem;"><i class="bi bi-exclamation-triangle-fill me-2"></i>确认删除</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body" style="color:#555;">
-        你确定要删除这个提示词吗？此操作无法撤销。
-      </div>
-      <div class="modal-footer" style="border-top:none;justify-content:flex-end;">
-        <button type="button" class="btn btn-light text-dark px-4 py-2" data-bs-dismiss="modal">取消</button>
-        <form id="deletePromptForm" method="post" action="">
-          {% csrf_token %}
-          <input type="hidden" name="confirm" value="1">
-          <button type="submit" class="btn btn-danger px-4 py-2" style="background-color:#dc3545;border-color:#dc3545;">删除</button>
-        </form>
-      </div>
-    </div>
-  </div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-<script>
-  function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-      const cookies = document.cookie.split(';');
-      for (let i = 0; i < cookies.length; i++) {
-        const cookie = cookies[i].trim();
-        if (cookie.substring(0, name.length + 1) === (name + '=')) {
-          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-          break;
-        }
-      }
-    }
-    return cookieValue;
-  }
-
-  function copyToClipboard(text) {
-    // 优先使用 Clipboard API
-    if (navigator.clipboard && window.isSecureContext) {
-      navigator.clipboard.writeText(text).then(() => {
-        showCopyToast();
-      }).catch(err => {
-        fallbackCopyTextToClipboard(text);
-      });
-    } else {
-      fallbackCopyTextToClipboard(text);
-    }
-  }
-
-  function fallbackCopyTextToClipboard(text) {
-    // 创建临时 textarea
-    const textArea = document.createElement("textarea");
-    textArea.value = text;
-    // 避免页面滚动
-    textArea.style.position = "fixed";
-    textArea.style.top = "0";
-    textArea.style.left = "0";
-    document.body.appendChild(textArea);
-    textArea.focus();
-    textArea.select();
-    try {
-      document.execCommand('copy');
-      showCopyToast();
-    } catch (err) {
-      alert('复制失败，请手动复制');
-    }
-    document.body.removeChild(textArea);
-  }
-
-  function showCopyToast() {
-    const copySuccess = document.getElementById('copySuccess');
-    if (copySuccess) {
-      copySuccess.classList.add('show');
-      setTimeout(() => {
-        copySuccess.classList.remove('show');
-      }, 2000);
-    }
-  }
-
-  // Delete Prompt Modal logic
-  var deletePromptModal = document.getElementById('deletePromptModal');
-  if (deletePromptModal) {
-    deletePromptModal.addEventListener('show.bs.modal', function (event) {
-      var button = event.relatedTarget;
-      var promptId = button.getAttribute('data-bs-prompt-id');
-      var form = deletePromptModal.querySelector('#deletePromptForm');
-      form.action = '/prompts/' + promptId + '/delete/';
-    });
-  }
-
-  // In-place editing logic
-  const toggleEditBtn = document.getElementById('editPromptBtn');
-  const promptContentDisplay = document.getElementById('promptContentDisplay');
-  const promptContentEdit = document.getElementById('promptContentEdit');
-  const editControls = document.getElementById('editControls');
-  const savePromptBtn = document.getElementById('savePromptBtn');
-  const cancelEditBtn = document.getElementById('cancelEditBtn');
-  const promptSaveSuccessToast = document.getElementById('promptSaveSuccessToast');
-
-  // Initialize originalContent defensively
-  let originalContent = promptContentDisplay ? promptContentDisplay.innerText : '';
-
-  // Ensure all elements exist before adding event listeners to prevent errors
-  if (toggleEditBtn && promptContentDisplay && promptContentEdit && editControls && savePromptBtn && cancelEditBtn) {
-    // Initially hide edit controls
-    editControls.style.display = 'none'; // Ensure it's hidden on load
-
-    toggleEditBtn.addEventListener('click', function() {
-      console.log('Edit button clicked.');
-      if (promptContentEdit.style.display === 'none') {
-        originalContent = promptContentDisplay.innerText;
-        promptContentDisplay.style.display = 'none';
-        promptContentEdit.value = originalContent;
-        promptContentEdit.style.display = 'block';
-        editControls.style.display = 'flex'; // Show save/cancel buttons
-        console.log('Edit mode: editControls display is', editControls.style.display);
-        // 编辑图标始终可见，不在这里隐藏它
-      }
-    });
-
-    cancelEditBtn.addEventListener('click', function() {
-      console.log('Cancel button clicked.');
-      promptContentEdit.style.display = 'none';
-      promptContentDisplay.innerText = originalContent; // Restore original content
-      promptContentDisplay.style.display = 'block';
-      editControls.style.display = 'none'; // Hide save/cancel buttons
-      console.log('Cancel mode: editControls display is', editControls.style.display);
-      // 编辑图标始终可见，不在这里显示它
-    });
-
-    savePromptBtn.addEventListener('click', function() {
-      console.log('Save button clicked.');
-      const newContent = promptContentEdit.value;
-      const promptId = {{ prompt.id }};
-      const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]') ? document.querySelector('[name=csrfmiddlewaretoken]').value : '';
-
-      fetch(`/api/prompt/${promptId}/update/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRFToken': csrfToken
-        },
-        body: JSON.stringify({ content: newContent })
-      })
-      .then(response => {
-        if (!response.ok) {
-          return response.json().then(errorData => Promise.reject(errorData.error || response.statusText));
-        }
-        return response.json();
-      })
-      .then(data => {
-        if (data.success) {
-          if (promptSaveSuccessToast) {
-            promptSaveSuccessToast.classList.add('show');
-            setTimeout(() => {
-              promptSaveSuccessToast.classList.remove('show');
-            }, 3000);
-          }
-          if (promptContentDisplay) promptContentDisplay.innerText = data.content;
-          originalContent = data.content;
-        } else {
-          alert('更新失败：' + (data.error || data.message));
-        }
-        // Revert to display mode (hide save/cancel, KEEP edit button visible)
-        if (promptContentEdit) promptContentEdit.style.display = 'none';
-        if (promptContentDisplay) promptContentDisplay.style.display = 'block';
-        if (editControls) editControls.style.display = 'none'; // Hide save/cancel buttons
-        console.log('Save mode: editControls display is', editControls.style.display);
-        // 编辑图标始终可见，不在这里影响它
-      })
-      .catch(error => {
-        console.error('Error:', error);
-        alert('网络请求或更新失败：' + error);
-        // On network error, revert to display mode (hide save/cancel, KEEP edit button visible)
-        if (promptContentEdit) promptContentEdit.style.display = 'none';
-        if (promptContentDisplay) promptContentDisplay.innerText = originalContent;
-        if (promptContentDisplay) promptContentDisplay.style.display = 'block';
-        if (editControls) editControls.style.display = 'none'; // Hide save/cancel buttons
-        console.log('Error mode: editControls display is', editControls.style.display);
-        // 编辑图标始终可见，不在这里影响它
-      });
-    });
-  }
-
-  // Ollama Chat Logic
-  document.addEventListener('DOMContentLoaded', function() {
-    // 动态加载 Ollama 模型列表
-    var chatModelSelect = document.getElementById('chatModel');
-    if (chatModelSelect) {
-      fetch('/api/ollama_models/')
-        .then(function(response) { return response.json(); })
-        .then(function(data) {
-          chatModelSelect.innerHTML = '';
-          if (data.success && Array.isArray(data.models)) {
-            data.models.forEach(function(model) {
-              var opt = document.createElement('option');
-              opt.value = model;
-              opt.textContent = model;
-              chatModelSelect.appendChild(opt);
-            });
-            // 添加自定义选项
-            var customOpt = document.createElement('option');
-            customOpt.value = '';
-            customOpt.textContent = '自定义...';
-            chatModelSelect.appendChild(customOpt);
-          } else {
-            chatModelSelect.innerHTML = '<option>llama2</option><option>qwen3:8b</option><option>glm-4</option><option>phi3</option><option>自定义...</option>';
-          }
-        })
-        .catch(function() {
-          chatModelSelect.innerHTML = '<option>llama2</option><option>qwen3:8b</option><option>glm-4</option><option>phi3</option><option>自定义...</option>';
-        });
-    }
-
-    var chatInputForm = document.getElementById('chatInputForm');
-    var chatInput = document.getElementById('chatInput');
-    var chatMessages = document.getElementById('chatMessages');
-    var chatTemperatureInput = document.getElementById('chatTemperature');
-    var chatMaxTokensInput = document.getElementById('chatMaxTokens');
-    var chatTopPInput = document.getElementById('chatTopP');
-    var initialChatMessage = document.getElementById('initialChatMessage'); // 获取初始提示消息元素
-
-    if (chatInputForm && chatInput && chatMessages && chatModelSelect && chatTemperatureInput && chatMaxTokensInput && chatTopPInput) {
-      chatInputForm.addEventListener('submit', async function(event) {
-        event.preventDefault(); // Prevent default form submission
-        var userInput = chatInput.value.trim();
-        if (!userInput) return;
-
-        // 如果初始提示消息存在，则隐藏它
-        if (initialChatMessage) {
-            initialChatMessage.style.display = 'none';
-        }
-
-        // Get selected model and parameters
-        var model = chatModelSelect.value;
-        var temperature = parseFloat(chatTemperatureInput.value);
-        var maxTokens = parseInt(chatMaxTokensInput.value);
-        var topP = parseFloat(chatTopPInput.value);
-
-        // Display user message
-        var userMessageDiv = document.createElement('div');
-        userMessageDiv.className = 'message user-message';
-        userMessageDiv.innerHTML = `<div class="message-content">${userInput}</div>`;
-        chatMessages.appendChild(userMessageDiv);
-
-        // Add loading spinner
-        var loadingDiv = document.createElement('div');
-        loadingDiv.className = 'message ai-message';
-        loadingDiv.innerHTML = `
-            <div class="message-content">
-                <div class="message-text">
-                    <div class="spinner-border spinner-border-sm text-primary" role="status">
-                        <span class="visually-hidden">Loading...</span>
-                    </div>
-                </div>
-            </div>
-        `;
-        chatMessages.appendChild(loadingDiv);
-        chatMessages.scrollTop = chatMessages.scrollHeight; // Scroll to bottom
-
-        chatInput.value = ''; // Clear input
-
-        // Fetch prompt content from the hidden div (or directly from Django context if preferred)
-        var promptContent = promptContentDisplay.innerText;
-
-        try {
-          var response = await fetch('/api/ollama_chat/', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'X-CSRFToken': getCookie('csrftoken')
-            },
-            body: JSON.stringify({
-              model: model,
-              prompt_content: promptContent,
-              user_input: userInput,
-              temperature: temperature,
-              max_tokens: maxTokens,
-              top_p: topP
-            })
-          });
-
-          var data = await response.json();
-
-          // Remove loading spinner
-          chatMessages.removeChild(loadingDiv);
-
-          var aiMessageDiv = document.createElement('div');
-          aiMessageDiv.className = 'message ai-message';
-          if (data.success) {
-            aiMessageDiv.innerHTML = `<div class="message-content">${data.response}</div>`;
-          } else {
-            aiMessageDiv.innerHTML = `<div class="message-content"><div class="message-text text-danger">Error: ${data.error}</div></div>`;
-          }
-          chatMessages.appendChild(aiMessageDiv);
-          chatMessages.scrollTop = chatMessages.scrollHeight; // Scroll to bottom
-
-        } catch (error) {
-          console.error('Fetch error:', error);
-          // Remove loading spinner
-          chatMessages.removeChild(loadingDiv);
-
-          var errorDiv = document.createElement('div');
-          errorDiv.className = 'message ai-message';
-          errorDiv.innerHTML = `<div class="message-content"><div class="message-text text-danger">Fetch Error: ${error.message || error}</div></div>`;
-          chatMessages.appendChild(errorDiv);
-          chatMessages.scrollTop = chatMessages.scrollHeight; // Scroll to bottom
-        }
-      });
-    }
-
-    // 清空聊天按钮逻辑
-    var clearBtn = document.getElementById('clearChatBtn');
-    if (clearBtn) {
-        clearBtn.onclick = function() {
-            var chatMsg = document.getElementById('chatMessages');
-            if (chatMsg) {
-                chatMsg.innerHTML = ''; // 清空所有消息
-                if (initialChatMessage) {
-                    initialChatMessage.style.display = 'flex'; // 重新显示初始提示消息
-                }
-            }
-        };
-    }
-  });
-</script>
 {% endblock %} 
