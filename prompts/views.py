@@ -14,6 +14,10 @@ import requests # 引入 requests 库
 from langchain_community.llms import Ollama
 from langchain.callbacks.manager import CallbackManager
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
+from django.utils import timezone
+from django.core.files.storage import default_storage
+import os
+import tempfile
 
 # Create your views here.
 
@@ -307,6 +311,63 @@ def ollama_models(request):
 @csrf_exempt
 @login_required
 @require_POST
+def import_prompts_excel(request):
+    user = request.user
+    file = request.FILES.get('file')
+    if not file:
+        return JsonResponse({'success': False, 'error': '未收到上传文件'}, status=400)
+    filename = file.name.lower()
+    if not (filename.endswith('.xlsx') or filename.endswith('.xls')):
+        return JsonResponse({'success': False, 'error': '仅支持Excel文件（.xls, .xlsx）'}, status=400)
+
+    # Save file to temp location
+    with tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(filename)[1]) as tmp:
+        for chunk in file.chunks():
+            tmp.write(chunk)
+        tmp_path = tmp.name
+
+    try:
+        if filename.endswith('.xlsx'):
+            import openpyxl
+            wb = openpyxl.load_workbook(tmp_path)
+            ws = wb.active
+            rows = list(ws.iter_rows(values_only=True))
+        else:
+            import xlrd
+            wb = xlrd.open_workbook(tmp_path)
+            ws = wb.sheet_by_index(0)
+            rows = [ws.row_values(i) for i in range(ws.nrows)]
+        if not rows or len(rows) < 2:
+            return JsonResponse({'success': False, 'error': 'Excel文件内容为空或缺少数据行'}, status=400)
+        header = [str(h).strip().lower() for h in rows[0]]
+        if 'title' not in header or 'content' not in header:
+            return JsonResponse({'success': False, 'error': 'Excel文件必须包含title和content字段'}, status=400)
+        idx_title = header.index('title')
+        idx_content = header.index('content')
+        idx_desc = header.index('description') if 'description' in header else None
+        from .models import Prompt
+        imported = 0
+        for row in rows[1:]:
+            title = str(row[idx_title]).strip() if idx_title < len(row) else ''
+            content = str(row[idx_content]).strip() if idx_content < len(row) else ''
+            description = str(row[idx_desc]).strip() if idx_desc is not None and idx_desc < len(row) else ''
+            if title and content:
+                prompt = Prompt(
+                    title=title,
+                    content=content,
+                    description=description,
+                    owner=user,
+                    created_at=timezone.now(),
+                    updated_at=timezone.now(),
+                )
+                prompt.save()
+                imported += 1
+        return JsonResponse({'success': True, 'imported': imported})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': f'解析Excel失败: {str(e)}'}, status=500)
+    finally:
+        os.remove(tmp_path)
+
 def save_prompt(request):
     try:
         data = json.loads(request.body)
@@ -339,4 +400,3 @@ def save_prompt(request):
         return JsonResponse({'success': True, 'id': prompt.id})
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
-

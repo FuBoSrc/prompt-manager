@@ -22,4 +22,5 @@ urlpatterns = [
     path('api/menus/', menu_api, name='menu_api'),
     path('api/menus/<int:menu_id>/', menu_api, name='menu_api_detail'),
     path('save', views.save_prompt, name='save_prompt'),
+    path('api/import_prompts_excel/', views.import_prompts_excel, name='import_prompts_excel'),
 ] 

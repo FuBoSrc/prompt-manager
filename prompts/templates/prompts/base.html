@@ -95,8 +95,33 @@
       });
       importInput.addEventListener('change', function(e) {
         if (importInput.files.length > 0) {
-          // 这里只弹窗提示，后续可实现上传逻辑
-          alert('已选择文件: ' + importInput.files[0].name);
+          var file = importInput.files[0];
+          var formData = new FormData();
+          formData.append('file', file);
+          // 可选：显示加载中
+          var loadingAlert = document.createElement('div');
+          loadingAlert.className = 'alert alert-info';
+          loadingAlert.innerText = '正在上传并解析文件...';
+          document.body.appendChild(loadingAlert);
+          fetch('/api/import_prompts_excel/', {
+            method: 'POST',
+            body: formData,
+            credentials: 'same-origin'
+          })
+          .then(function(response) { return response.json(); })
+          .then(function(data) {
+            document.body.removeChild(loadingAlert);
+            if (data.success) {
+              alert('导入成功，成功导入 ' + data.imported + ' 条记录！');
+              // 可选：刷新页面或列表
+            } else {
+              alert('导入失败：' + (data.error || '未知错误'));
+            }
+          })
+          .catch(function(err) {
+            document.body.removeChild(loadingAlert);
+            alert('网络错误或服务器异常：' + err);
+          });
         }
       });
     }
