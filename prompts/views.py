@@ -352,16 +352,20 @@ def import_prompts_excel(request):
             content = str(row[idx_content]).strip() if idx_content < len(row) else ''
             description = str(row[idx_desc]).strip() if idx_desc is not None and idx_desc < len(row) else ''
             if title and content:
-                prompt = Prompt(
-                    title=title,
-                    content=content,
-                    description=description,
-                    owner=user,
-                    created_at=timezone.now(),
-                    updated_at=timezone.now(),
-                )
-                prompt.save()
-                imported += 1
+                try:
+                    prompt = Prompt(
+                        title=title,
+                        content=content,
+                        description=description,
+                        owner=user,
+                        created_at=timezone.now(),
+                        updated_at=timezone.now(),
+                        menu_id=1
+                    )
+                    prompt.save()
+                    imported += 1
+                except Exception as db_err:
+                    return JsonResponse({'success': False, 'error': f'导入失败：{str(db_err)}'}, status=500)
         return JsonResponse({'success': True, 'imported': imported})
     except Exception as e:
         return JsonResponse({'success': False, 'error': f'解析Excel失败: {str(e)}'}, status=500)
