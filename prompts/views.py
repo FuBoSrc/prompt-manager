@@ -304,3 +304,37 @@ def ollama_models(request):
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
+@csrf_exempt
+@login_required
+@require_POST
+def save_prompt(request):
+    try:
+        data = json.loads(request.body)
+        title = data.get('title', '').strip()
+        content = data.get('content', '').strip()
+        role = data.get('role', '').strip()
+        goal = data.get('goal', '').strip()
+        context = data.get('context', '').strip()
+        output_format = data.get('output_format', '').strip()
+        example = data.get('example', '').strip()
+        tags = data.get('tags', [])
+        # 校验必填
+        if not title or not content or not role or not goal:
+            return JsonResponse({'success': False, 'error': '标题、内容、角色、目标为必填项'}, status=400)
+        prompt = Prompt.objects.create(
+            title=title,
+            content=content,
+            role=role,
+            goal=goal,
+            context=context,
+            output_format=output_format,
+            example=example,
+            owner=request.user
+        )
+        if tags:
+            prompt.tags.set(tags)
+        prompt.save()
+        return JsonResponse({'success': True, 'id': prompt.id})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+

@@ -4,53 +4,113 @@
   body {
     background: linear-gradient(135deg, #fff 0%, #fff7e6 100%) !important;
   }
+  .stepper {
+    display: flex;
+    margin-bottom: 2.5rem;
+    user-select: none;
+    justify-content: center;
+  }
+  .stepper-step {
+    display: flex;
+    align-items: center;
+    position: relative;
+    min-width: 160px;
+    height: 48px;
+    padding: 0 18px 0 36px;
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #fff;
+    background: #bdbdbd;
+    transition: background 0.2s;
+    clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 50%, calc(100% - 18px) 100%, 0 100%, 18px 50%);
+    margin-right: -18px;
+    z-index: 1;
+  }
+  .stepper-step.done {
+    background: linear-gradient(90deg, #8fd14f 0%, #b6e388 100%);
+    color: #222;
+  }
+  .stepper-step.active {
+    background: linear-gradient(90deg, #ff9800 0%, #ffb74d 100%);
+    color: #fff;
+    z-index: 2;
+  }
+  .stepper-step:last-child {
+    margin-right: 0;
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 18px 50%);
+  }
+  .stepper-step .step-num {
+    display: inline-block;
+    width: 28px;
+    height: 28px;
+    line-height: 28px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.18);
+    color: #fff;
+    font-size: 1.1rem;
+    font-weight: 700;
+    text-align: center;
+    margin-right: 10px;
+  }
+  .stepper-step.done .step-num {
+    background: #fff;
+    color: #8fd14f;
+  }
+  .stepper-step.active .step-num {
+    background: #fff;
+    color: #ff9800;
+  }
+  @media (max-width: 900px) {
+    .stepper-step { min-width: 100px; font-size: 0.95rem; padding: 0 8px 0 20px; }
+    .stepper-step .step-num { width: 22px; height: 22px; line-height: 22px; font-size: 0.95rem; }
+  }
 </style>
 <div class="container py-5">
   <h2 class="fw-bold mb-4 text-center" style="color:#ff9800;font-size:2rem;letter-spacing:1px;">添加与优化提示词</h2>
+  <div class="row g-4 mb-3">
+    <div class="col-md-6">
+      <label for="promptName" class="form-label fw-bold">名称</label>
+      <input type="text" class="form-control rounded-3" id="title" name="title" required>
+    </div>
+    <div class="col-md-3">
+      <label for="promptCategory" class="form-label fw-bold">选择分类</label>
+      <select class="form-select rounded-3" id="menu" name="menu">
+        <option value="">请选择分类</option>
+      </select>
+    </div>
+    <div class="col-md-3">
+      <label for="promptTags" class="form-label fw-bold">选择标签</label>
+      <select class="form-select rounded-3" id="tags" name="tags" multiple>
+      </select>
+    </div>
+  </div>
+  <!-- 步骤进度条 -->
+  <div class="stepper" id="stepperBar">
+    <div class="stepper-step done" data-step="0"><span class="step-num">1</span>角色与目标</div>
+    <div class="stepper-step" data-step="1"><span class="step-num">2</span>背景信息</div>
+    <div class="stepper-step" data-step="2"><span class="step-num">3</span>输出格式</div>
+    <div class="stepper-step" data-step="3"><span class="step-num">4</span>示例</div>
+    <div class="stepper-step" data-step="4"><span class="step-num">5</span>生成</div>
+  </div>
   <form id="promptForm">
-    <div class="row g-4 mb-3">
-      <div class="col-md-6">
-        <label for="promptName" class="form-label fw-bold">名称</label>
-        <input type="text" class="form-control rounded-3" id="promptName" name="name" required>
-      </div>
-      <div class="col-md-3">
-        <label for="promptCategory" class="form-label fw-bold">选择分类</label>
-        <select class="form-select rounded-3" id="promptCategory" name="category">
-          <option value="">请选择分类</option>
-        </select>
-      </div>
-      <div class="col-md-3">
-        <label for="promptTags" class="form-label fw-bold">选择标签</label>
-        <select class="form-select rounded-3" id="promptTags" name="tags" multiple>
-        </select>
-      </div>
-    </div>
-    <div class="mb-4">
-      <ul class="nav nav-pills justify-content-center" id="stepNav">
-        <li class="nav-item"><a class="nav-link active" data-step="0" href="#">角色与目标</a></li>
-        <li class="nav-item"><a class="nav-link" data-step="1" href="#">背景信息</a></li>
-        <li class="nav-item"><a class="nav-link" data-step="2" href="#">输出格式</a></li>
-        <li class="nav-item"><a class="nav-link" data-step="3" href="#">示例</a></li>
-      </ul>
-    </div>
+
+      
     <div id="stepContents" class="mb-4">
       <div class="step-content active" data-step="0">
         <div class="row g-3">
           <div class="col-md-6">
-            <label for="role" class="form-label fw-bold">选择角色</label>
-            <select class="form-select rounded-3" id="role" name="role">
-              <option value="">请选择角色</option>
-            </select>
+            <label for="role" class="form-label fw-bold">*角色</label>
+            <textarea class="form-control rounded-3" id="role" name="role" rows="3" required></textarea>
           </div>
           <div class="col-md-6">
-            <label for="goal" class="form-label fw-bold">目标</label>
+            <label for="goal" class="form-label fw-bold">*目标</label>
             <textarea class="form-control rounded-3" id="goal" name="goal" rows="3"></textarea>
           </div>
         </div>
       </div>
       <div class="step-content" data-step="1">
-        <label for="background" class="form-label fw-bold">背景信息</label>
-        <textarea class="form-control rounded-3" id="background" name="background" rows="3"></textarea>
+        <label for="context" class="form-label fw-bold">背景信息</label>
+        <textarea class="form-control rounded-3" id="context" name="context" rows="3"></textarea>
       </div>
       <div class="step-content" data-step="2">
         <label for="outputFormat" class="form-label fw-bold">输出格式</label>
@@ -60,13 +120,12 @@
         <label for="example" class="form-label fw-bold">示例</label>
         <textarea class="form-control rounded-3" id="example" name="example" rows="3"></textarea>
       </div>
-    </div>
-    <div class="mb-4">
-      <label for="template" class="form-label fw-bold">提示词模版</label>
-      <textarea class="form-control rounded-3" id="template" name="template" rows="4"></textarea>
+      <div class="step-content" data-step="4">
+        <label for="template" class="form-label fw-bold">提示词模版</label>
+        <textarea class="form-control rounded-3" id="content" name="content" rows="20"></textarea>
+      </div>
     </div>
     <div class="d-flex flex-wrap gap-3 justify-content-center mb-2">
-      <button type="button" class="btn btn-warning px-4" id="generateBtn" style="color:#fff;font-weight:600;">生成提示词模版</button>
       <button type="button" class="btn btn-outline-warning px-4" id="optimizeBtn" style="font-weight:600;">优化提示词模版</button>
       <button type="button" class="btn btn-success px-4" id="saveBtn" style="font-weight:600;">保存</button>
       <button type="button" class="btn btn-info px-4" id="testBtn" style="font-weight:600;">测试</button>
@@ -150,31 +209,38 @@
 </style>
 <script>
 // 步骤导航切换
-const navLinks = document.querySelectorAll('#stepNav .nav-link');
+const navLinks = document.querySelectorAll('#stepperBar .stepper-step');
 const stepContents = document.querySelectorAll('.step-content');
-navLinks.forEach(link => {
-    link.addEventListener('click', function(e) {
-        e.preventDefault();
-        navLinks.forEach(l => l.classList.remove('active'));
-        this.classList.add('active');
-        const step = this.getAttribute('data-step');
-        stepContents.forEach(content => {
-            content.classList.toggle('active', content.getAttribute('data-step') === step);
-        });
-    });
+let currentStep = 0;
+function updateStepper(step) {
+  navLinks.forEach((link, idx) => {
+    link.classList.remove('active', 'done');
+    if (idx < step) link.classList.add('done');
+    else if (idx === step) link.classList.add('active');
+  });
+  stepContents.forEach(content => {
+    content.classList.toggle('active', content.getAttribute('data-step') == step);
+  });
+}
+navLinks.forEach((link, idx) => {
+  link.addEventListener('click', function(e) {
+    e.preventDefault();
+    currentStep = idx;
+    updateStepper(currentStep);
+    // 进入第5步时自动生成markdown内容
+    if (currentStep === 4) {
+      const role = document.getElementById('role').value.trim();
+      const goal = document.getElementById('goal').value.trim();
+      const context = document.getElementById('context').value.trim();
+      const outputFormat = document.getElementById('outputFormat').value.trim();
+      const example = document.getElementById('example').value.trim();
+      const md = `# 角色\n${role}\n\n# 目标\n${goal}\n\n# 上下文信息\n${context}\n\n# 输出格式\n${outputFormat}\n\n# 示例\n${example}\n`;
+      console.log(md);
+      document.getElementById('content').value = md;
+    }
+  });
 });
-// 生成提示词模版
-const generateBtn = document.getElementById('generateBtn');
-generateBtn.onclick = async function() {
-    const data = Object.fromEntries(new FormData(document.getElementById('promptForm')));
-    const res = await fetch('/generate', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify(data)
-    });
-    const result = await res.json();
-    document.getElementById('template').value = result.template || '';
-};
+updateStepper(currentStep);
 // 优化提示词模版
 const optimizeBtn = document.getElementById('optimizeBtn');
 optimizeBtn.onclick = async function() {
@@ -190,21 +256,33 @@ optimizeBtn.onclick = async function() {
 // 保存
 const saveBtn = document.getElementById('saveBtn');
 saveBtn.onclick = async function() {
-    const data = Object.fromEntries(new FormData(document.getElementById('promptForm')));
+    const form = document.getElementById('promptForm');
+    const data = Object.fromEntries(new FormData(form));
+    // tags为多选
+    data.tags = Array.from(document.getElementById('tags').selectedOptions).map(opt => opt.value);
+    // 字段名适配后端
+    data.role = document.getElementById('role').value;
+    data.goal = document.getElementById('goal').value;
+    data.context = document.getElementById('context').value;
+    data.output_format = document.getElementById('outputFormat').value;
+    data.example = document.getElementById('example').value;
+    data.content = document.getElementById('content').value;
+    data.title = document.getElementById('title').value;
     const res = await fetch('/save', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify(data)
     });
-    if (res.ok) {
+    const result = await res.json();
+    if (result.success) {
         alert('保存成功！');
     } else {
-        alert('保存失败！');
+        alert('保存失败：' + (result.error || '未知错误'));
     }
 };
 // 测试弹窗
 const testBtn = document.getElementById('testBtn');
-const testModal = new bootstrap.Modal(document.getElementById('testModal'));
+// const testModal = new bootstrap.Modal(document.getElementById('testModal'));
 testBtn.onclick = function() {
     document.getElementById('testTask').value = '';
     document.getElementById('testModel').value = '';

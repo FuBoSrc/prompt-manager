@@ -26,7 +26,11 @@ class Menu(models.Model):
 
 class Prompt(models.Model):
     title = models.CharField(max_length=200, unique=True)
-    content = models.TextField()
+    content = models.TextField(blank=True)
+    role = models.TextField(blank=True,)
+    goal = models.TextField(blank=True,)
+    output_format = models.TextField(blank=True,)
+    example = models.TextField(blank=True,)
     description = models.TextField(blank=True)
     tags = models.ManyToManyField(Tag, blank=True)
     version = models.CharField(max_length=20, default="1.0.0")

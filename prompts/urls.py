@@ -21,4 +21,5 @@ urlpatterns = [
     path('prompt_manage/', views.prompt_manage, name='prompt_manage'),
     path('api/menus/', menu_api, name='menu_api'),
     path('api/menus/<int:menu_id>/', menu_api, name='menu_api_detail'),
+    path('save', views.save_prompt, name='save_prompt'),
 ] 
