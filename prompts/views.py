@@ -348,10 +348,12 @@ def import_prompts_excel(request):
         from .models import Prompt
         imported = 0
         for row in rows[1:]:
-            title = str(row[idx_title]).strip() if idx_title < len(row) else ''
-            content = str(row[idx_content]).strip() if idx_content < len(row) else ''
-            description = str(row[idx_desc]).strip() if idx_desc is not None and idx_desc < len(row) else ''
+            title = row[idx_title]
+            content = row[idx_content]
             if title and content:
+                title = str(row[idx_title]).strip()
+                content = str(row[idx_content]).strip()
+                description = str(row[idx_desc]).strip() if idx_desc is not None else ''
                 try:
                     prompt = Prompt(
                         title=title,
