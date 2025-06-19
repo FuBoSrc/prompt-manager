@@ -429,7 +429,12 @@
 </div>
 
 {% elif mode == 'create' %}
-<h2 class="fw-normal mb-4" style="color:#ff9800;font-size:2rem;padding-left:2.1rem;"><i class="bi bi-plus-circle me-2"></i>创建新提示词</h2>
+<div class="d-flex justify-content-between align-items-center mt-4 mb-3">
+    <h3 class="fw-bold d-flex align-items-center">
+    <i class="bi bi-plus-circle me-2" style="color:#ff9800;font-size:2rem;margin-right:0.5rem;"></i>
+    创建新提示词
+    </h3>
+</div>
 <div class="card shadow-lg p-4 animated-card" style="background:#fff;color:#222;max-width:1200px;margin:auto;">
   <form method="post" action="{% url 'prompt_create' %}">
     {% csrf_token %}
@@ -463,7 +468,12 @@
 </div>
 
 {% elif mode == 'edit' %}
-<h2 class="fw-normal mb-4" style="color:#ff9800;font-size:2rem;padding-left:2.1rem;"><i class="bi bi-pencil-square me-2"></i>编辑提示词</h2>
+<div class="d-flex justify-content-between align-items-center mt-4 mb-3">
+    <h3 class="fw-bold d-flex align-items-center">
+        <i class="bi bi-pencil-square me-2" style="color:#ff9800;font-size:2rem;margin-right:0.5rem;"></i>
+        编辑提示词
+    </h3>
+</div>
 <div class="card shadow-lg p-4 animated-card" style="background:#fff;color:#222;max-width:1200px;margin:auto;">
   <form method="post" action="{% url 'prompt_edit' pk=prompt.id %}">
     {% csrf_token %}
@@ -563,8 +573,8 @@
               <div class="col-12 mb-2">
                 <label for="chatModel" class="form-label mb-0 fw-bold">选择模型</label>
                 <select id="chatModel" class="form-select form-select-sm">
-                  <option>llama2</option>
                   <option>qwen3:8b</option>
+                  <option>llama2</option>
                   <option>glm-4</option>
                   <option>phi3</option>
                   <option>自定义...</option>
