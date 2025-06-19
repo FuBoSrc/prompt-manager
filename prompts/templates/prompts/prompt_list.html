@@ -573,11 +573,7 @@
               <div class="col-12 mb-2">
                 <label for="chatModel" class="form-label mb-0 fw-bold">选择模型</label>
                 <select id="chatModel" class="form-select form-select-sm">
-                  <option>qwen3:8b</option>
-                  <option>llama2</option>
-                  <option>glm-4</option>
-                  <option>phi3</option>
-                  <option>自定义...</option>
+                  <!-- Options will be loaded dynamically -->
                 </select>
               </div>
               <div class="col-auto">
@@ -817,19 +813,46 @@
 
   // Ollama Chat Logic
   document.addEventListener('DOMContentLoaded', function() {
-    const chatInputForm = document.getElementById('chatInputForm');
-    const chatInput = document.getElementById('chatInput');
-    const chatMessages = document.getElementById('chatMessages');
-    const chatModelSelect = document.getElementById('chatModel');
-    const chatTemperatureInput = document.getElementById('chatTemperature');
-    const chatMaxTokensInput = document.getElementById('chatMaxTokens');
-    const chatTopPInput = document.getElementById('chatTopP');
-    const initialChatMessage = document.getElementById('initialChatMessage'); // 获取初始提示消息元素
+    // 动态加载 Ollama 模型列表
+    var chatModelSelect = document.getElementById('chatModel');
+    if (chatModelSelect) {
+      fetch('/api/ollama_models/')
+        .then(function(response) { return response.json(); })
+        .then(function(data) {
+          chatModelSelect.innerHTML = '';
+          if (data.success && Array.isArray(data.models)) {
+            data.models.forEach(function(model) {
+              var opt = document.createElement('option');
+              opt.value = model;
+              opt.textContent = model;
+              chatModelSelect.appendChild(opt);
+            });
+            // 添加自定义选项
+            var customOpt = document.createElement('option');
+            customOpt.value = '';
+            customOpt.textContent = '自定义...';
+            chatModelSelect.appendChild(customOpt);
+          } else {
+            chatModelSelect.innerHTML = '<option>llama2</option><option>qwen3:8b</option><option>glm-4</option><option>phi3</option><option>自定义...</option>';
+          }
+        })
+        .catch(function() {
+          chatModelSelect.innerHTML = '<option>llama2</option><option>qwen3:8b</option><option>glm-4</option><option>phi3</option><option>自定义...</option>';
+        });
+    }
+
+    var chatInputForm = document.getElementById('chatInputForm');
+    var chatInput = document.getElementById('chatInput');
+    var chatMessages = document.getElementById('chatMessages');
+    var chatTemperatureInput = document.getElementById('chatTemperature');
+    var chatMaxTokensInput = document.getElementById('chatMaxTokens');
+    var chatTopPInput = document.getElementById('chatTopP');
+    var initialChatMessage = document.getElementById('initialChatMessage'); // 获取初始提示消息元素
 
     if (chatInputForm && chatInput && chatMessages && chatModelSelect && chatTemperatureInput && chatMaxTokensInput && chatTopPInput) {
       chatInputForm.addEventListener('submit', async function(event) {
         event.preventDefault(); // Prevent default form submission
-        const userInput = chatInput.value.trim();
+        var userInput = chatInput.value.trim();
         if (!userInput) return;
 
         // 如果初始提示消息存在，则隐藏它
@@ -838,19 +861,19 @@
         }
 
         // Get selected model and parameters
-        const model = chatModelSelect.value;
-        const temperature = parseFloat(chatTemperatureInput.value);
-        const maxTokens = parseInt(chatMaxTokensInput.value);
-        const topP = parseFloat(chatTopPInput.value);
+        var model = chatModelSelect.value;
+        var temperature = parseFloat(chatTemperatureInput.value);
+        var maxTokens = parseInt(chatMaxTokensInput.value);
+        var topP = parseFloat(chatTopPInput.value);
 
         // Display user message
-        const userMessageDiv = document.createElement('div');
+        var userMessageDiv = document.createElement('div');
         userMessageDiv.className = 'message user-message';
         userMessageDiv.innerHTML = `<div class="message-content">${userInput}</div>`;
         chatMessages.appendChild(userMessageDiv);
 
         // Add loading spinner
-        const loadingDiv = document.createElement('div');
+        var loadingDiv = document.createElement('div');
         loadingDiv.className = 'message ai-message';
         loadingDiv.innerHTML = `
             <div class="message-content">
@@ -867,10 +890,10 @@
         chatInput.value = ''; // Clear input
 
         // Fetch prompt content from the hidden div (or directly from Django context if preferred)
-        const promptContent = promptContentDisplay.innerText;
+        var promptContent = promptContentDisplay.innerText;
 
         try {
-          const response = await fetch('/api/ollama_chat/', {
+          var response = await fetch('/api/ollama_chat/', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -886,12 +909,12 @@
             })
           });
 
-          const data = await response.json();
+          var data = await response.json();
 
           // Remove loading spinner
           chatMessages.removeChild(loadingDiv);
 
-          const aiMessageDiv = document.createElement('div');
+          var aiMessageDiv = document.createElement('div');
           aiMessageDiv.className = 'message ai-message';
           if (data.success) {
             aiMessageDiv.innerHTML = `<div class="message-content">${data.response}</div>`;
@@ -906,7 +929,7 @@
           // Remove loading spinner
           chatMessages.removeChild(loadingDiv);
 
-          const errorDiv = document.createElement('div');
+          var errorDiv = document.createElement('div');
           errorDiv.className = 'message ai-message';
           errorDiv.innerHTML = `<div class="message-content"><div class="message-text text-danger">Fetch Error: ${error.message || error}</div></div>`;
           chatMessages.appendChild(errorDiv);

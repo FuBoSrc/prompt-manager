@@ -7,7 +7,7 @@ from django.contrib.auth.decorators import login_required
 from django.forms import ModelForm, ModelMultipleChoiceField
 from django.forms.widgets import SelectMultiple
 from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_POST, require_http_methods
+from django.views.decorators.http import require_POST, require_http_methods, require_GET
 from django.http import JsonResponse
 import json
 import requests # 引入 requests 库
@@ -232,6 +232,22 @@ def ollama_chat(request):
 
     return JsonResponse({'success': False, 'error': 'Invalid request method.'}, status=405)
 
+
 @login_required
 def prompt_manage(request):
     return render(request, 'prompts/prompt_manage.html')
+
+@require_GET
+def ollama_models(request):
+    try:
+        # Query local Ollama service for models
+        response = requests.get("http://localhost:11434/api/tags", timeout=5)
+        response.raise_for_status()
+        data = response.json()
+        # The models are in data['models'] or data['models'][i]['name'] depending on Ollama's API
+        # For Ollama v0.1.34+, the endpoint returns {"models": [{"name": "llama2"}, ...]}
+        models = [m['name'] for m in data.get('models', []) if 'embed' not in m['name']]
+        return JsonResponse({'success': True, 'models': models})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
