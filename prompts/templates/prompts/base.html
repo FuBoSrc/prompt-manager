@@ -113,7 +113,7 @@
             document.body.removeChild(loadingAlert);
             if (data.success) {
               alert('导入成功，成功导入 ' + data.imported + ' 条记录！');
-              // 可选：刷新页面或列表
+              location.reload(); // 自动刷新页面
             } else {
               alert('导入失败：' + (data.error || '未知错误'));
             }
